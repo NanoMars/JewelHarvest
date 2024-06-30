@@ -2,9 +2,22 @@ import sys
 import pygame
 import math
 import io
+import random
 from PIL import Image, ImageEnhance, ImageOps
 import colorsys
 from pygame.locals import *
+
+#Define game variables
+width, height = 1280, 720
+fps = 60
+ticks = 0
+timePassed = 0
+
+money = 0
+valueMultiplier = 1
+spawnTangent = 0
+SpawnTime = 5
+SpawnTimer = 0
 
 def shift_hue(img_path, degree_shift):
     # Load the image and adjust hue
@@ -25,22 +38,17 @@ def shift_hue(img_path, degree_shift):
     img.save(byte_io, format='PNG')
     byte_io.seek(0)
     return pygame.image.load(byte_io)
-
-
- 
+def spawn_gem(value):
+    gem = Gem(value * valueMultiplier, random.randrange(0, int(2 * width / 5)), random.randrange(0, int(height)))
+    sprites.add(gem)
 pygame.init()
 
 fpsClock = pygame.time.Clock()
 sprites = pygame.sprite.Group()
-width, height = 1280, 720
+
 screen = pygame.display.set_mode((width, height))
 
-#Define game variables
-fps = 60
-ticks = 0
-timePassed = 0
-money = 0
-valueMultiplier = 1
+
 
 class Gem(pygame.sprite.Sprite): 
   #define the sprite for the gem
@@ -63,8 +71,7 @@ class Gem(pygame.sprite.Sprite):
     self.image = pygame.transform.rotate(self.original_image, self.angle)
     self.rect = self.image.get_rect(center=self.rect.center)
 
-gem = Gem(1 * valueMultiplier, 100, 100)
-sprites.add(gem)
+spawn_gem(1)
 
 x, y = 0, 0
 # Game loop.
@@ -86,8 +93,6 @@ while True:
   sprites.update()
   ticks += 1
   timePassed = ticks/60
-  #in event handling:
-  
   
   # Draw.
   screen.fill((255, 255, 255))
