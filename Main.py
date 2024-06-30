@@ -7,23 +7,30 @@ from PIL import Image, ImageEnhance, ImageOps
 import colorsys
 from pygame.locals import *
 
-# Initialize font; you need to call this before using any font related functions
-pygame.font.init()  
+# Initialize Pygame
+pygame.init()
 
-# Choose a font and size
-font = pygame.font.SysFont('Arial', 24)  # or pygame.font.Font(None, 24) for a default font
+# Initialize font
+pygame.font.init()
 
-
-#Define game variables
+# Define game variables
 width, height = 1280, 720
+screen = pygame.display.set_mode((width, height))  # Initialize display before loading images
+
+# Loading fonts and images
+font = pygame.font.SysFont('Arial', 24)
+signboard = pygame.image.load('SignBoard.png').convert_alpha()  # Now this should work without error
+
 fps = 60
 ticks = 0
 timePassed = 0
-
 money = 0
 valueMultiplier = 1
 gemsSpawned = 0
 spawnTime = 5
+scale_factor = 5
+
+# Rest of your game setup and logic...
 
 def shift_hue(img_path, degree_shift):
     # Load the image and adjust hue
@@ -31,13 +38,13 @@ def shift_hue(img_path, degree_shift):
     ld = img.load()
     
     width, height = img.size
-    for y in range(height):
-        for x in range(width):
-            r, g, b, a = ld[x, y]
+    for mouse_y in range(height):
+        for mouse_x in range(width):
+            r, g, b, a = ld[mouse_x, mouse_y]
             h, s, v = colorsys.rgb_to_hsv(r/255., g/255., b/255.)
             h = (h + degree_shift/360.0) % 1.0
             r, g, b = colorsys.hsv_to_rgb(h, s, v)
-            ld[x, y] = (int(r * 255), int(g * 255), int(b * 255), a)
+            ld[mouse_x, mouse_y] = (int(r * 255), int(g * 255), int(b * 255), a)
     
     # Convert the PIL Image to a Pygame Surface
     byte_io = io.BytesIO()
@@ -52,10 +59,17 @@ pygame.init()
 fpsClock = pygame.time.Clock()
 sprites = pygame.sprite.Group()
 
-screen = pygame.display.set_mode((width, height))
+class Button():
+    def __init__(self, x, y, image):
+        self.image = image
+        original_width, original_height = self.image.get_size()
+        new_width = int(original_width * scale_factor)
+        new_height = int(original_height * scale_factor)
+        self.image = pygame.transform.scale(self.image, (new_width, new_height))
+        self.rect = self.image.get_rect(topright=(x, y))  # Position the rectangle
 
-
-
+    def draw(self):
+        screen.blit(self.image, (self.rect.x, self.rect.y))  # Use the correct attributes
 class Gem(pygame.sprite.Sprite): 
   #define the sprite for the gem
   def __init__(self, value, xPos, yPos):
@@ -64,20 +78,28 @@ class Gem(pygame.sprite.Sprite):
     
     pygame.sprite.Sprite.__init__(self)
     self.original_image = shift_hue("Gem.png", value * 10)
-    self.original_image = pygame.transform.scale(self.original_image, (64, 64))
+    original_width, original_height = self.original_image.get_size()
+    new_width = int(original_width * scale_factor)
+    new_height = int(original_height * scale_factor)
+    self.original_image = pygame.transform.scale(self.original_image, (new_width, new_height))
     self.image = self.original_image
     self.rect = self.image.get_rect()
     self.rect.center = (xPos, yPos)
     self.angle = 0
-    
-    
   def update(self):
     self.ticks += 1
     self.angle = math.sin(self.ticks / fps * 2) * 10
     self.image = pygame.transform.rotate(self.original_image, self.angle)
     self.rect = self.image.get_rect(center=self.rect.center)
 
-x, y = 0, 0
+
+sign_post = Button(width, 0, signboard)
+
+
+
+mouse_x, mouse_y = 0, 0
+
+
 # Game loop.
 while True:
   fpsClock.tick(fps)
@@ -87,9 +109,9 @@ while True:
       sys.exit()
     elif event.type == MOUSEBUTTONDOWN: 
       if event.button == 1:
-        x,y = event.pos
+        mouse_x,mouse_y = event.pos
         for gem in sprites:
-          if gem.rect.collidepoint(x,y): 
+          if gem.rect.collidepoint(mouse_x,mouse_y): 
             money += gem.value
             sprites.remove(gem)
   # Update.
@@ -109,4 +131,5 @@ while True:
   sprites.draw(screen)
   text_surface = font.render(f'Money: ${money}', True, (0, 0, 0))
   screen.blit(text_surface, (10, 10))
+  sign_post.draw()
   pygame.display.flip()
