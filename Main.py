@@ -67,9 +67,19 @@ class Button():
         new_height = int(original_height * scale_factor)
         self.image = pygame.transform.scale(self.image, (new_width, new_height))
         self.rect = self.image.get_rect(topright=(x, y))  # Position the rectangle
-
+        self.clicked = False
     def draw(self):
         screen.blit(self.image, (self.rect.x, self.rect.y))  # Use the correct attributes
+        
+        pos = pygame.mouse.get_pos()
+        
+        if self.rect.collidepoint(pos):
+          if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
+            print("clicked")
+            self.clicked = True
+          elif pygame.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+        
 class Gem(pygame.sprite.Sprite): 
   #define the sprite for the gem
   def __init__(self, value, xPos, yPos):
