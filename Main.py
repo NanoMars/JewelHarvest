@@ -8,6 +8,7 @@ pygame.init()
 fpsClock = pygame.time.Clock()
 sprites = pygame.sprite.Group()
 
+fps = 60
 width, height = 1280, 720
 screen = pygame.display.set_mode((width, height))
  
