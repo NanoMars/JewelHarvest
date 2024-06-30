@@ -16,7 +16,7 @@ timePassed = 0
 money = 0
 valueMultiplier = 1
 gemsSpawned = 0
-spawnTime = 1
+spawnTime = 5
 
 def shift_hue(img_path, degree_shift):
     # Load the image and adjust hue
@@ -91,9 +91,10 @@ while True:
   ticks += 1
   timePassed = ticks/fps
   if timePassed / spawnTime > gemsSpawned:
-      spawn_gem(100)
+      spawn_gem(random.randrange(1,10))
       gemsSpawned += 1
   # Draw.
   screen.fill((255, 255, 255))
+  pygame.draw.rect(screen, (155, 155, 155), (2 * width / 5, 0, width, height))
   sprites.draw(screen)
   pygame.display.flip()
