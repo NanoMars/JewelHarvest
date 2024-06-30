@@ -34,6 +34,7 @@ class GreenGem(pygame.sprite.Sprite):
 greenGem = GreenGem()
 sprites.add(greenGem)
 
+x, y = 0, 0
 # Game loop.
 while True:
   fpsClock.tick(fps)
@@ -41,9 +42,16 @@ while True:
     if event.type == QUIT:
       pygame.quit()
       sys.exit()
-  
+    elif event.type == MOUSEBUTTONDOWN: 
+      if event.button == 1:
+        x,y = event.pos
+        for gem in sprites:
+          if gem.rect.collidepoint(x,y): 
+            print("yay")
   # Update.
   sprites.update()
+  #in event handling:
+  
   
   # Draw.
   screen.fill((255, 255, 255))
