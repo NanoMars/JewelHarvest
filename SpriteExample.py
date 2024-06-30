@@ -4,17 +4,21 @@ import math
 from pygame.locals import *
  
 pygame.init()
- 
+
 fpsClock = pygame.time.Clock()
 sprites = pygame.sprite.Group()
-fps = 60
 width, height = 1280, 720
 screen = pygame.display.set_mode((width, height))
 
+#Define game variables
+fps = 60
+money = 0
+
 class GreenGem(pygame.sprite.Sprite): 
   #define the sprite for the greenGem
-  def __init__(self):
+  def __init__(self, value):
     self.ticks = 0
+    self.value = value
     
     pygame.sprite.Sprite.__init__(self)
     self.original_image = pygame.image.load("GreenGem.png").convert_alpha() 
@@ -31,7 +35,7 @@ class GreenGem(pygame.sprite.Sprite):
     self.image = pygame.transform.rotate(self.original_image, self.angle)
     self.rect = self.image.get_rect(center=self.rect.center)
 
-greenGem = GreenGem()
+greenGem = GreenGem(5)
 sprites.add(greenGem)
 
 x, y = 0, 0
@@ -47,7 +51,8 @@ while True:
         x,y = event.pos
         for gem in sprites:
           if gem.rect.collidepoint(x,y): 
-            print("yay")
+            money += gem.value
+            print(money)
   # Update.
   sprites.update()
   #in event handling:
