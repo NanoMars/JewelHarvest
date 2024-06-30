@@ -15,9 +15,12 @@ class Player(pygame.sprite.Sprite):
   def __init__(self):
     pygame.sprite.Sprite.__init__(self)
     self.image = pygame.Surface((50,50))
-    self.image.fill((255,255,255))
+    self.image.fill((0,0,0))
     self.rect = self.image.get_rect()
     self.rect.center = (width / 2, height / 2)
+  def update(self):
+    self.rect.x += 5
+    self.rect.y += 5
     
 
 # Game loop.
@@ -34,6 +37,6 @@ while True:
   sprites.add(player)
   
   # Draw.
-  screen.fill((15, 15, 25))
+  screen.fill((255, 255, 255))
   sprites.draw(screen)
   pygame.display.flip()
