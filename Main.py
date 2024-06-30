@@ -87,14 +87,19 @@ while True:
             sprites.remove(gem)
             print(money)
   # Update.
+  progress_ratio = 1 - (-1 * (timePassed / spawnTime) + gemsSpawned)
+  progressBarWidth = int((2 * width / 5) * progress_ratio)
+  print(progress_ratio)
+  
   sprites.update()
   ticks += 1
   timePassed = ticks/fps
   if timePassed / spawnTime > gemsSpawned:
-      spawn_gem(random.randrange(1,10))
+      spawn_gem(random.randrange(1,15))
       gemsSpawned += 1
   # Draw.
   screen.fill((255, 255, 255))
   pygame.draw.rect(screen, (155, 155, 155), (2 * width / 5, 0, width, height))
+  pygame.draw.rect(screen, (0, 0, 0), (0, 0, progressBarWidth, int(height / 16)))
   sprites.draw(screen)
   pygame.display.flip()
