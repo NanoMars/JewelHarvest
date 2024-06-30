@@ -10,20 +10,22 @@ fps = 60
 width, height = 1280, 720
 screen = pygame.display.set_mode((width, height))
 
-class Player(pygame.sprite.Sprite): 
-  #define the sprite for the player
+class GreenGem(pygame.sprite.Sprite): 
+  #define the sprite for the greenGem
   def __init__(self):
     pygame.sprite.Sprite.__init__(self)
-    self.image = pygame.Surface((50,50))
-    self.image.fill((0,0,0))
+    self.original_image = pygame.image.load("GreenGem.png").convert_alpha() 
+    self.image = self.original_image
     self.rect = self.image.get_rect()
     self.rect.center = (width / 2, height / 2)
-  def update(self):
-    self.rect.x += 5
-    self.rect.y += 5
+    self.angle = 0
     
-player = Player()
-sprites.add(player)
+  def update(self):
+    self.angle += 1
+    self.image = pygame.transform.rotate(self.original_image, self.angle)
+    self.rect = self.image.get_rect(center=self.rect.center)
+greenGem = GreenGem()
+sprites.add(greenGem)
 
 # Game loop.
 while True:
