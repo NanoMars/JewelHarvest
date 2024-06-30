@@ -7,6 +7,13 @@ from PIL import Image, ImageEnhance, ImageOps
 import colorsys
 from pygame.locals import *
 
+# Initialize font; you need to call this before using any font related functions
+pygame.font.init()  
+
+# Choose a font and size
+font = pygame.font.SysFont('Arial', 24)  # or pygame.font.Font(None, 24) for a default font
+
+
 #Define game variables
 width, height = 1280, 720
 fps = 60
@@ -85,11 +92,9 @@ while True:
           if gem.rect.collidepoint(x,y): 
             money += gem.value
             sprites.remove(gem)
-            print(money)
   # Update.
   progress_ratio = 1 - (-1 * (timePassed / spawnTime) + gemsSpawned)
   progressBarWidth = int((2 * width / 5) * progress_ratio)
-  print(progress_ratio)
   
   sprites.update()
   ticks += 1
@@ -100,6 +105,8 @@ while True:
   # Draw.
   screen.fill((255, 255, 255))
   pygame.draw.rect(screen, (155, 155, 155), (2 * width / 5, 0, width, height))
-  pygame.draw.rect(screen, (0, 0, 0), (0, 0, progressBarWidth, int(height / 16)))
+  pygame.draw.rect(screen, (127, 127, 127), (0, 0, progressBarWidth, int(height / 16)))
   sprites.draw(screen)
+  text_surface = font.render(f'Money: ${money}', True, (0, 0, 0))
+  screen.blit(text_surface, (10, 10))
   pygame.display.flip()
