@@ -22,6 +22,8 @@ class Player(pygame.sprite.Sprite):
     self.rect.x += 5
     self.rect.y += 5
     
+player = Player()
+sprites.add(player)
 
 # Game loop.
 while True:
@@ -33,8 +35,6 @@ while True:
   
   # Update.
   sprites.update()
-  player = Player()
-  sprites.add(player)
   
   # Draw.
   screen.fill((255, 255, 255))
