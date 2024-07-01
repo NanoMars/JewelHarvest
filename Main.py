@@ -16,6 +16,11 @@ WIDTH, HEIGHT = 1280, 720
 FPS = 60
 SCALE_FACTOR = 5
 
+# Constants for button spacing
+button_start_x = WIDTH - 10  # Adjusted for better visibility
+button_start_y = 10
+button_spacing_y = 10  # Adjusted for better spacing
+
 # Game variables
 ticks = 0
 time_passed = 0
@@ -81,8 +86,7 @@ class ShopButton():
 
     def display_info(self):
         text_surface = font.render(f'{self.owned} {self.description} - ${self.cost}', True, (0, 0, 0))
-        
-        screen.blit(text_surface, (self.rect.x + 20, self.rect.y + 40))
+        screen.blit(text_surface, (self.rect.x + 16.5, self.rect.y + (self.rect.height // 2 - text_surface.get_height() // 2)))
 
     def handle_click(self):
         global money  # Declare global variable at the beginning
@@ -146,10 +150,9 @@ def spawn_extra_gems():
 signboard = pygame.image.load('SignBoard.png').convert_alpha()
 
 # Create shop buttons
-shop_buttons = [
-    ShopButton(WIDTH - 150, 50, signboard, increase_value_multiplier, 10, 'Increase Multiplier'),
-    ShopButton(WIDTH - 150, 150, signboard, spawn_extra_gems, 20, 'Spawn Extra Gems')
-]
+button1 = ShopButton(button_start_x, button_start_y, signboard, increase_value_multiplier, 10, 'Increase Multiplier')
+button2 = ShopButton(button_start_x, button_start_y + button1.image.get_height() + button_spacing_y, signboard, spawn_extra_gems, 20, 'Spawn Extra Gems')
+shop_buttons = [button1, button2]
 
 # Game loop
 while True:
