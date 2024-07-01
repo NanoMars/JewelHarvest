@@ -60,39 +60,43 @@ def shift_hue(img_path, degree_shift):
     byte_io.seek(0)
     return pygame.image.load(byte_io)
 
-class Button():
+class ShopButton():
     """
-    A simple button class for Pygame.
+    A class representing a shop button in the game.
     """
     def __init__(self, x, y, image, action, cost, description):
-        super().__init__(x, y, image)
+        self.image = pygame.transform.scale(image, (int(image.get_width() * SCALE_FACTOR), int(image.get_height() * SCALE_FACTOR)))
+        self.rect = self.image.get_rect(topright=(x, y))
         self.action = action
         self.base_cost = cost
         self.cost = cost
         self.description = description
         self.owned = 0
-        self.image = pygame.transform.scale(image, (int(image.get_width() * SCALE_FACTOR), int(image.get_height() * SCALE_FACTOR)))
-        self.rect = self.image.get_rect(topright=(x, y))
         self.clicked = False
 
     def draw(self):
-        text_surface = font.render(f'{self.description} - ${self.cost}', True, (0, 0, 0))
-        screen.blit(text_surface, (self.rect.x - text_surface.get_width() - 10, self.rect.y))
+        screen.blit(self.image, self.rect.topleft)
+        self.display_info()
+        self.handle_click()
+
+    def display_info(self):
+        text_surface = font.render(f'{self.owned} {self.description} - ${self.cost}', True, (0, 0, 0))
+        
+        screen.blit(text_surface, (self.rect.x + 20, self.rect.y + 40))
 
     def handle_click(self):
+        global money  # Declare global variable at the beginning
         if self.rect.collidepoint(pygame.mouse.get_pos()):
             if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
                 if money >= self.cost:
                     print(f'Bought: {self.description} for ${self.cost}')
                     self.action()  # Call the unique action
-                    global money
                     money -= self.cost
                     self.owned += 1
                     self.cost = self.base_cost * (self.owned + 1)  # Increase cost based on the number owned
                 self.clicked = True
             elif pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
-                
 
 class Gem(pygame.sprite.Sprite):
     """
@@ -124,9 +128,28 @@ def spawn_gem(value):
     gem = Gem(value * value_multiplier, random.randrange(0, int(2 * WIDTH / 5)), random.randrange(0, HEIGHT))
     sprites.add(gem)
 
+def increase_value_multiplier():
+    """
+    Action to increase the value multiplier.
+    """
+    global value_multiplier
+    value_multiplier += 1
+
+def spawn_extra_gems():
+    """
+    Action to spawn extra gems.
+    """
+    global spawn_time
+    spawn_time = (spawn_time * 4) / 5
+
 # Load resources
 signboard = pygame.image.load('SignBoard.png').convert_alpha()
-sign_post = Button(WIDTH, 0, signboard)
+
+# Create shop buttons
+shop_buttons = [
+    ShopButton(WIDTH - 150, 50, signboard, increase_value_multiplier, 10, 'Increase Multiplier'),
+    ShopButton(WIDTH - 150, 150, signboard, spawn_extra_gems, 20, 'Spawn Extra Gems')
+]
 
 # Game loop
 while True:
@@ -159,5 +182,9 @@ while True:
     sprites.draw(screen)
     text_surface = font.render(f'Money: ${money}', True, (0, 0, 0))
     screen.blit(text_surface, (10, 10))
-    sign_post.draw()
+
+    # Draw and update shop buttons
+    for button in shop_buttons:
+        button.draw()
+
     pygame.display.flip()
