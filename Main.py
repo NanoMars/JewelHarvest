@@ -64,22 +64,35 @@ class Button():
     """
     A simple button class for Pygame.
     """
-    def __init__(self, x, y, image):
+    def __init__(self, x, y, image, action, cost, description):
+        super().__init__(x, y, image)
+        self.action = action
+        self.base_cost = cost
+        self.cost = cost
+        self.description = description
+        self.owned = 0
         self.image = pygame.transform.scale(image, (int(image.get_width() * SCALE_FACTOR), int(image.get_height() * SCALE_FACTOR)))
         self.rect = self.image.get_rect(topright=(x, y))
         self.clicked = False
 
     def draw(self):
-        screen.blit(self.image, self.rect.topleft)
-        self.handle_click()
+        text_surface = font.render(f'{self.description} - ${self.cost}', True, (0, 0, 0))
+        screen.blit(text_surface, (self.rect.x - text_surface.get_width() - 10, self.rect.y))
 
     def handle_click(self):
         if self.rect.collidepoint(pygame.mouse.get_pos()):
             if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
-                print("Button clicked")
+                if money >= self.cost:
+                    print(f'Bought: {self.description} for ${self.cost}')
+                    self.action()  # Call the unique action
+                    global money
+                    money -= self.cost
+                    self.owned += 1
+                    self.cost = self.base_cost * (self.owned + 1)  # Increase cost based on the number owned
                 self.clicked = True
             elif pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
+                
 
 class Gem(pygame.sprite.Sprite):
     """
