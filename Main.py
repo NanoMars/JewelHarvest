@@ -113,15 +113,15 @@ class ShopButton():
                 self.clicked = False
 
     def update_rotation(self):
-        if self.ticks >= FPS * self.animation_time:
-            self.rotating = False
-            self.ticks = 0
-            self.angle = 0
-        elif self.rotating:
-            self.ticks += 1
-            self.angle = (math.sin(2 * (self.ticks / (FPS / 7)) + math.pi) * (10 / ((self.ticks / (FPS / 7) * 2) + math.pi)) * 5)
-            self.image = pygame.transform.rotate(self.original_image, self.angle)
-            self.rect = self.image.get_rect(center=self.rect.center)
+      if self.ticks >= FPS * self.animation_time:
+        self.rotating = False
+        self.ticks = 0
+        self.angle = 0
+      elif self.rotating:
+        self.ticks += 1
+      self.angle = (math.sin(2 * (self.ticks / (FPS / 7)) + math.pi) * (10 / ((self.ticks / (FPS / 7) * 2) + math.pi)) * 5)
+      self.image = pygame.transform.rotate(self.original_image, self.angle)
+      self.rect = self.image.get_rect(center=self.rect.center)
 
 class Gem(pygame.sprite.Sprite):
     """
