@@ -167,12 +167,24 @@ def increase_value_multiplier():
     global value_multiplier
     value_multiplier += 1
 
+def increase_value_multiplier():
+    """
+    Action to increase the value multiplier.
+    """
+    global value_multiplier
+    value_multiplier += 1
+
 def spawn_extra_gems():
     """
     Action to spawn extra gems.
     """
-    global spawn_time
+    global spawn_time, time_passed, gems_spawned
+    # Calculate the current progress ratio
+    current_progress_ratio = time_passed / spawn_time if spawn_time else 0
+    # Adjust spawn_time
     spawn_time = (spawn_time * 4) / 5
+    # Recalculate gems_spawned based on new spawn_time
+    gems_spawned = int(time_passed / spawn_time)
 
 def draw_tiling_background(background, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
     """
@@ -201,7 +213,7 @@ def draw_progress_bar(bar_image, x, y, progress):
     bar_width = bar_image.get_width()
     max_reveal_width = int((screen_proportion_numerator / screen_proportion_denominator) * WIDTH)
     reveal_width = int(max_reveal_width * progress)
-    screen.blit(bar_image, (x, y), (bar_width - reveal_width, 0, reveal_width, bar_image.get_height()))
+    screen.blit(bar_image, (x + reveal_width - bar_width, y), (0, 0, bar_width, bar_image.get_height()))
 
 # Create shop buttons
 button1 = ShopButton(button_start_x, button_start_y, signboard, increase_value_multiplier, 10, 'Increase Multiplier')
@@ -223,7 +235,7 @@ while True:
                         money += gem.value
                         sprites.remove(gem)
                         break  # Exit the loop after finding the clicked gem
-
+    
     # Update game state
     sprites.update()
     ticks += 1
@@ -245,6 +257,6 @@ while True:
 
     # Draw and update shop buttons
     for button in shop_buttons:
-      button.draw()
+        button.draw()
 
     pygame.display.flip()
