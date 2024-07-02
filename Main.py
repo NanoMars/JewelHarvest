@@ -17,7 +17,7 @@ FPS = 60
 SCALE_FACTOR = 5
 
 # Constants for button spacing
-button_start_x = WIDTH - 200  # Adjusted for better visibility
+button_start_x = WIDTH - 10  # Adjusted for better visibility
 button_start_y = 10
 button_spacing_y = 10  # Adjusted for better spacing
 
@@ -92,34 +92,36 @@ class ShopButton():
 
     def display_info(self):
         text_surface = font.render(f'{self.owned} {self.description} - ${self.cost}', True, (0, 0, 0))
-        screen.blit(text_surface, (self.rect.x - text_surface.get_width() - 10, self.rect.y + (self.rect.height // 2 - text_surface.get_height() // 2)))
+        rotated_text = pygame.transform.rotate(text_surface, self.angle)
+        text_rect = rotated_text.get_rect(center=self.rect.center)
+        screen.blit(rotated_text, text_rect.topleft)
 
     def handle_click(self):
         global money  # Declare global variable at the beginning
         if self.rect.collidepoint(pygame.mouse.get_pos()):
-          if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
-            self.rotating = True
-            self.ticks = 0  # Reset ticks when clicked
-            self.clicked = True
-            if money >= self.cost:
-                print(f'Bought: {self.description} for ${self.cost}')
-                self.action()  # Call the unique action
-                money -= self.cost
-                self.owned += 1
-                self.cost = self.base_cost * (self.owned + 1)  # Increase cost based on the number owned        
-          elif pygame.mouse.get_pressed()[0] == 0:
+            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
+                self.rotating = True
+                self.ticks = 0  # Reset ticks when clicked
+                self.clicked = True
+                if money >= self.cost:
+                    print(f'Bought: {self.description} for ${self.cost}')
+                    self.action()  # Call the unique action
+                    money -= self.cost
+                    self.owned += 1
+                    self.cost = self.base_cost * (self.owned + 1)  # Increase cost based on the number owned
+            elif pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
 
     def update_rotation(self):
-      if self.ticks >= FPS * self.animation_time:
-        self.rotating = False
-        self.ticks = 0
-        self.angle = 0
-      elif self.rotating == True:
-        self.ticks += 1
-      self.angle = (math.sin(2 * (self.ticks / (FPS / 7)) + math.pi) * (10 / ((self.ticks / (FPS / 7) * 2) + math.pi)) * 5)
-      self.image = pygame.transform.rotate(self.original_image, self.angle)
-      self.rect = self.image.get_rect(center=self.rect.center)
+        if self.ticks >= FPS * self.animation_time:
+            self.rotating = False
+            self.ticks = 0
+            self.angle = 0
+        elif self.rotating:
+            self.ticks += 1
+            self.angle = (math.sin(2 * (self.ticks / (FPS / 7)) + math.pi) * (10 / ((self.ticks / (FPS / 7) * 2) + math.pi)) * 5)
+            self.image = pygame.transform.rotate(self.original_image, self.angle)
+            self.rect = self.image.get_rect(center=self.rect.center)
 
 class Gem(pygame.sprite.Sprite):
     """
@@ -194,7 +196,7 @@ while True:
     ticks += 1
     time_passed = ticks / FPS
     if time_passed / spawn_time > gems_spawned:
-        spawn_gem(random.randrange(100, 101))
+        spawn_gem(random.randrange(1, 15))
         gems_spawned += 1
 
     # Render everything
