@@ -28,11 +28,17 @@ money = 0
 value_multiplier = 1
 gems_spawned = 0
 spawn_time = 5
+screen_proportion_top, screen_proportion_bottom  = 14, 19
 
 # Setup display and font
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 font = pygame.font.SysFont('Arial', 24)
 fps_clock = pygame.time.Clock()
+
+# Load resources
+background = pygame.image.load('Rock.png').convert()
+shop_background = pygame.image.load('shopBackground.png').convert()
+signboard = pygame.image.load('SignBoard.png').convert_alpha()
 
 # Sprite groups
 sprites = pygame.sprite.Group()
@@ -113,15 +119,15 @@ class ShopButton():
                 self.clicked = False
 
     def update_rotation(self):
-      if self.ticks >= FPS * self.animation_time:
-        self.rotating = False
-        self.ticks = 0
-        self.angle = 0
-      elif self.rotating:
-        self.ticks += 1
-      self.angle = (math.sin(2 * (self.ticks / (FPS / 7)) + math.pi) * (10 / ((self.ticks / (FPS / 7) * 2) + math.pi)) * 5)
-      self.image = pygame.transform.rotate(self.original_image, self.angle)
-      self.rect = self.image.get_rect(center=self.rect.center)
+        if self.ticks >= FPS * self.animation_time:
+            self.rotating = False
+            self.ticks = 0
+            self.angle = 0
+        elif self.rotating:
+            self.ticks += 1
+            self.angle = (math.sin(2 * (self.ticks / (FPS / 7)) + math.pi) * (10 / ((self.ticks / (FPS / 7) * 2) + math.pi)) * 5)
+            self.image = pygame.transform.rotate(self.original_image, self.angle)
+            self.rect = self.image.get_rect(center=self.rect.center)
 
 class Gem(pygame.sprite.Sprite):
     """
@@ -150,7 +156,7 @@ def spawn_gem(value):
     Args:
     value (int): The value of the gem.
     """
-    gem = Gem(value * value_multiplier, random.randrange(0, int(2 * WIDTH / 5)), random.randrange(0, HEIGHT))
+    gem = Gem(value * value_multiplier, random.randrange(0, int(screen_proportion_top * WIDTH / screen_proportion_bottom)), random.randrange(0, HEIGHT))
     sprites.add(gem)
 
 def increase_value_multiplier():
@@ -167,8 +173,19 @@ def spawn_extra_gems():
     global spawn_time
     spawn_time = (spawn_time * 4) / 5
 
-# Load resources
-signboard = pygame.image.load('SignBoard.png').convert_alpha()
+def draw_tiling_background(background, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
+    """
+    Draw a tiling background on the screen within the given coordinates.
+
+    Args:
+    background (pygame.Surface): The background image to tile.
+    x1, y1, x2, y2 (int): Coordinates to define the area to fill with the background.
+    """
+    background = pygame.transform.scale(background, (int(background.get_width() * SCALE_FACTOR), int(background.get_height() * SCALE_FACTOR)))
+    bg_width, bg_height = background.get_size()
+    for x in range(x1, x2, bg_width):
+        for y in range(y1, y2, bg_height):
+            screen.blit(background, (x, y))
 
 # Create shop buttons
 button1 = ShopButton(button_start_x, button_start_y, signboard, increase_value_multiplier, 10, 'Increase Multiplier')
@@ -200,9 +217,9 @@ while True:
         gems_spawned += 1
 
     # Render everything
-    screen.fill((255, 255, 255))
-    pygame.draw.rect(screen, (155, 155, 155), (2 * WIDTH / 5, 0, WIDTH, HEIGHT))
-    pygame.draw.rect(screen, (127, 127, 127), (0, 0, int((2 * WIDTH / 5) * (1 - (-1 * (time_passed / spawn_time) + gems_spawned))), int(HEIGHT / 16)))
+    draw_tiling_background(background)
+    draw_tiling_background(shop_background, screen_proportion_top * WIDTH // screen_proportion_bottom, 0, WIDTH, HEIGHT)
+    pygame.draw.rect(screen, (127, 127, 127), (0, 0, int((screen_proportion_top * WIDTH / screen_proportion_bottom) * (1 - (-1 * (time_passed / spawn_time) + gems_spawned))), int(HEIGHT / 16)))
     sprites.draw(screen)
     text_surface = font.render(f'Money: ${money}', True, (0, 0, 0))
     screen.blit(text_surface, (10, 10))
