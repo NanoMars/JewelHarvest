@@ -17,7 +17,7 @@ FPS = 60
 SCALE_FACTOR = 5
 
 # Constants for button spacing
-button_start_x = WIDTH - 10  # Adjusted for better visibility
+button_start_x = WIDTH - 10 
 button_start_y = 10
 button_spacing_y = 10  # Adjusted for better spacing
 
@@ -28,7 +28,7 @@ money = 0
 value_multiplier = 1
 gems_spawned = 0
 spawn_time = 5
-screen_proportion_top, screen_proportion_bottom = 14, 19
+screen_proportion_numerator, screen_proportion_denominator = 14, 19
 
 # Setup display and font
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -126,9 +126,9 @@ class ShopButton():
             self.angle = 0
         elif self.rotating:
             self.ticks += 1
-            self.angle = (math.sin(2 * (self.ticks / (FPS / 7)) + math.pi) * (10 / ((self.ticks / (FPS / 7) * 2) + math.pi)) * 5)
-            self.image = pygame.transform.rotate(self.original_image, self.angle)
-            self.rect = self.image.get_rect(center=self.rect.center)
+        self.angle = (math.sin(2 * (self.ticks / (FPS / 7)) + math.pi) * (10 / ((self.ticks / (FPS / 7) * 2) + math.pi)) * 5)
+        self.image = pygame.transform.rotate(self.original_image, self.angle)
+        self.rect = self.image.get_rect(center=self.rect.center)
 
 class Gem(pygame.sprite.Sprite):
     """
@@ -157,7 +157,7 @@ def spawn_gem(value):
     Args:
     value (int): The value of the gem.
     """
-    gem = Gem(value * value_multiplier, random.randrange(0, int(screen_proportion_top * WIDTH / screen_proportion_bottom)), random.randrange(0, HEIGHT))
+    gem = Gem(value * value_multiplier, random.randrange(0, int(screen_proportion_numerator * WIDTH / screen_proportion_denominator)), random.randrange(0, HEIGHT))
     sprites.add(gem)
 
 def increase_value_multiplier():
@@ -188,20 +188,20 @@ def draw_tiling_background(background, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
         for y in range(y1, y2, bg_height):
             screen.blit(background, (x, y))
 
-def draw_progress_bar(bar_image, x, y, width, height, progress):
+def draw_progress_bar(bar_image, x, y, progress):
     """
-    Draw a progress bar that moves from left to right without scaling.
+    Draw a progress bar that is gradually revealed from left to right.
 
     Args:
     bar_image (pygame.Surface): The progress bar image.
     x, y (int): The starting coordinates of the progress bar.
-    width, height (int): The dimensions of the progress bar area.
     progress (float): The progress value (0 to 1).
     """
     bar_image = pygame.transform.scale(bar_image, (int(bar_image.get_width() * SCALE_FACTOR), int(bar_image.get_height() * SCALE_FACTOR)))
-    max_width = width - bar_image.get_width()
-    bar_x = x + int(max_width * progress)
-    screen.blit(bar_image, (bar_x, y))
+    bar_width = bar_image.get_width()
+    max_reveal_width = int((screen_proportion_numerator / screen_proportion_denominator) * WIDTH)
+    reveal_width = int(max_reveal_width * progress)
+    screen.blit(bar_image, (x, y), (bar_width - reveal_width, 0, reveal_width, bar_image.get_height()))
 
 # Create shop buttons
 button1 = ShopButton(button_start_x, button_start_y, signboard, increase_value_multiplier, 10, 'Increase Multiplier')
@@ -234,11 +234,10 @@ while True:
 
     # Render everything
     draw_tiling_background(background)
-    draw_tiling_background(shop_background, screen_proportion_top * WIDTH // screen_proportion_bottom, 0, WIDTH, HEIGHT)
+    draw_tiling_background(shop_background, screen_proportion_numerator * WIDTH // screen_proportion_denominator, 0, WIDTH, HEIGHT)
 
-    # Draw progress bar
-    progress = (time_passed % spawn_time) / spawn_time
-    draw_progress_bar(progress_bar, 0, 0, screen_proportion_top * WIDTH // screen_proportion_bottom, int(HEIGHT / 16), progress)
+    progress = (time_passed / spawn_time) % 1  # Calculate the progress value
+    draw_progress_bar(progress_bar, 0, 0, progress)  # Draw the progress bar
 
     sprites.draw(screen)
     text_surface = font.render(f'Money: ${money}', True, (0, 0, 0))
