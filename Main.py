@@ -30,6 +30,7 @@ gems_spawned = 0
 spawn_time = 5
 screen_proportion_numerator, screen_proportion_denominator = 14, 19
 gem_time_passed_adjustment = 0
+time_passed = 0
 
 # Setup display and font
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -73,7 +74,13 @@ def shift_hue(img_path, degree_shift):
     byte_io.seek(0)
     return pygame.image.load(byte_io)
 
-class ShopButton():
+import pygame
+import math
+
+import pygame
+import math
+
+class ShopButton:
     """
     A class representing a shop button in the game.
     """
@@ -87,16 +94,18 @@ class ShopButton():
         self.description = description
         self.owned = 0
         self.clicked = False
-        self.ticks = 0  # To keep track of time since clicked
+        self.last_click_time = 0
         self.rotating = False
         self.angle = 0
-        self.animation_time = 6
+        self.animation_time = 6000  # in milliseconds
+        self.direction = 1
 
     def draw(self):
-        self.update_rotation()
+        global time_passed
+        self.update_rotation(time_passed)
         screen.blit(self.image, self.rect.topleft)
         self.display_info()
-        self.handle_click()
+        self.handle_click(time_passed)
 
     def display_info(self):
         text_surface = font.render(f'{self.owned} {self.description} - ${self.cost}', True, (0, 0, 0))
@@ -104,15 +113,15 @@ class ShopButton():
         text_rect = rotated_text.get_rect(center=self.rect.center)
         screen.blit(rotated_text, text_rect.topleft)
 
-    def handle_click(self):
+    def handle_click(self, time_passed):
         global money  # Declare global variable at the beginning
         if self.rect.collidepoint(pygame.mouse.get_pos()):
             if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
                 self.rotating = True
-                self.ticks = 0  # Reset ticks when clicked
+                self.last_click_time = time_passed  # Reset last click time when clicked
                 self.clicked = True
+                self.direction = self.direction * -1
                 if money >= self.cost:
-                    print(f'Bought: {self.description} for ${self.cost}')
                     self.action()  # Call the unique action
                     money -= self.cost
                     self.owned += 1
@@ -120,14 +129,13 @@ class ShopButton():
             elif pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
 
-    def update_rotation(self):
-        if self.ticks >= FPS * self.animation_time:
+    def update_rotation(self, time_passed):
+        if time_passed - self.last_click_time >= self.animation_time:
             self.rotating = False
-            self.ticks = 0
             self.angle = 0
         elif self.rotating:
-            self.ticks += 1
-        self.angle = (math.sin(2 * (self.ticks / (FPS / 7)) + math.pi) * (10 / ((self.ticks / (FPS / 7) * 2) + math.pi)) * 5)
+            elapsed_time = time_passed - self.last_click_time
+            self.angle = (math.sin(7 * (elapsed_time / 1000) + math.pi) * (10 / ((elapsed_time / 1000 * 20) + math.pi)) * 7) * self.direction
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
 
@@ -147,7 +155,7 @@ class Gem(pygame.sprite.Sprite):
 
     def update(self):
         self.ticks += 1
-        self.angle = math.sin(self.ticks / FPS * 2) * 10
+        self.angle = math.sin(self.ticks / time_passed * 2) * 10
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
 
@@ -226,6 +234,9 @@ shop_buttons = [button1, button2]
 # Game loop
 while True:
     fps_clock.tick(FPS)
+    if pygame.time.get_ticks != 0:
+      time_passed = pygame.time.get_ticks()
+    print(time_passed)
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
@@ -242,7 +253,7 @@ while True:
     # Update game state
     sprites.update()
     ticks += 1
-    gem_time_passed = (ticks + gem_time_passed_adjustment) / FPS
+    gem_time_passed = (time_passed + gem_time_passed_adjustment) / 1000
     if gem_time_passed / spawn_time > gems_spawned:
         spawn_gem(random.randrange(10000, 10001))
         gems_spawned += 1
@@ -253,12 +264,13 @@ while True:
 
     progress = (gem_time_passed / spawn_time) % 1  # Calculate the progress value
     draw_progress_bar(progress_bar, 0, 0, progress)  # Draw the progress bar
-    print(1 + ((gem_time_passed / spawn_time) - gems_spawned))
+    #print(1 + ((gem_time_passed / spawn_time) - gems_spawned))
 
     sprites.draw(screen)
     text_surface = font.render(f'Money: ${money}', True, (0, 0, 0))
     screen.blit(text_surface, (10, 10))
 
+    
     # Draw and update shop buttons
     for button in shop_buttons:
         button.draw()
