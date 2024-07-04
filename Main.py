@@ -18,7 +18,7 @@ SCALE_FACTOR = 5
 
 # Constants for button spacing
 button_start_x = WIDTH - 10 
-button_start_y = 10
+button_start_y = 170
 button_spacing_y = 10  # Adjusted for better spacing
 
 # Game variables
@@ -42,6 +42,7 @@ background = pygame.image.load('Rock.png').convert()
 shop_background = pygame.image.load('shopBackground.png').convert()
 signboard = pygame.image.load('SignBoard.png').convert_alpha()
 progress_bar = pygame.image.load('Bar.png').convert_alpha()
+displayboard = pygame.image.load('DisplayBoard.png').convert_alpha()
 
 # Sprite groups
 sprites = pygame.sprite.Group()
@@ -227,13 +228,36 @@ def draw_progress_bar(bar_image, x, y, progress):
 button1 = ShopButton(button_start_x, button_start_y, signboard, increase_value_multiplier, 10, 'Increase Multiplier')
 button2 = ShopButton(button_start_x, button_start_y + button1.image.get_height() + button_spacing_y, signboard, spawn_extra_gems, 20, 'Spawn Extra Gems')
 shop_buttons = [button1, button2]
+# Constants for DisplayBoard
+DISPLAY_BOARD_PROPORTION_NUMERATOR = 7
+DISPLAY_BOARD_PROPORTION_DENOMINATOR = 19
+
+def display_display_board():
+    """
+    Display the DisplayBoard at the calculated position and render the current money on it.
+    """
+    display_board_width = displayboard.get_width() * SCALE_FACTOR
+    display_board_height = displayboard.get_height() * SCALE_FACTOR
+
+    # Calculate the x and y coordinates
+    x = (WIDTH * DISPLAY_BOARD_PROPORTION_NUMERATOR) / DISPLAY_BOARD_PROPORTION_DENOMINATOR - (display_board_width / 2)
+    y = 0
+
+    # Draw the DisplayBoard
+    display_board_image = pygame.transform.scale(displayboard, (int(displayboard.get_width() * SCALE_FACTOR), int(displayboard.get_height() * SCALE_FACTOR)))
+    screen.blit(display_board_image, (x, y))
+
+    # Display the money on the DisplayBoard
+    money_text = font.render(f'{money}$', True, (0, 0, 0))
+    money_text_rect = money_text.get_rect(center=(x + display_board_image.get_width() / 2, y + display_board_image.get_height() / 2))
+    screen.blit(money_text, money_text_rect.topleft)
 
 # Game loop
 while True:
     fps_clock.tick(FPS)
-    if pygame.time.get_ticks != 0:
-      time_passed = pygame.time.get_ticks()
-    print(time_passed)
+    if pygame.time.get_ticks() != 0:
+        time_passed = pygame.time.get_ticks()
+
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
@@ -246,7 +270,7 @@ while True:
                         money += gem.value
                         sprites.remove(gem)
                         break  # Exit the loop after finding the clicked gem
-    
+
     # Update game state
     sprites.update()
     ticks += 1
@@ -259,15 +283,10 @@ while True:
     draw_tiling_background(background)
     sprites.draw(screen)
     draw_tiling_background(shop_background, screen_proportion_numerator * WIDTH // screen_proportion_denominator, 0, WIDTH, HEIGHT)
-
+    display_display_board()
     progress = (gem_time_passed / spawn_time) % 1  # Calculate the progress value
     draw_progress_bar(progress_bar, 0, 0, progress)  # Draw the progress bar
-    #print(1 + ((gem_time_passed / spawn_time) - gems_spawned))
 
-    text_surface = font.render(f'Money: ${money}', True, (0, 0, 0))
-    screen.blit(text_surface, (10, 10))
-
-    
     # Draw and update shop buttons
     for button in shop_buttons:
         button.draw()
