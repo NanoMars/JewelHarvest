@@ -18,7 +18,7 @@ SCALE_FACTOR = 5
 
 # Constants for button spacing
 button_start_x = WIDTH - 10 
-button_start_y = 170
+button_start_y = 180
 button_spacing_y = 10  # Adjusted for better spacing
 
 # Game variables
@@ -229,8 +229,7 @@ button1 = ShopButton(button_start_x, button_start_y, signboard, increase_value_m
 button2 = ShopButton(button_start_x, button_start_y + button1.image.get_height() + button_spacing_y, signboard, spawn_extra_gems, 20, 'Spawn Extra Gems')
 shop_buttons = [button1, button2]
 # Constants for DisplayBoard
-DISPLAY_BOARD_PROPORTION_NUMERATOR = 7
-DISPLAY_BOARD_PROPORTION_DENOMINATOR = 19
+
 
 def display_display_board():
     """
@@ -239,9 +238,8 @@ def display_display_board():
     display_board_width = displayboard.get_width() * SCALE_FACTOR
     display_board_height = displayboard.get_height() * SCALE_FACTOR
 
-    # Calculate the x and y coordinates
-    x = (WIDTH * DISPLAY_BOARD_PROPORTION_NUMERATOR) / DISPLAY_BOARD_PROPORTION_DENOMINATOR - (display_board_width / 2)
-    y = 0
+    x = button_start_x - display_board_width
+    y = 10  # 10 pixels from the top
 
     # Draw the DisplayBoard
     display_board_image = pygame.transform.scale(displayboard, (int(displayboard.get_width() * SCALE_FACTOR), int(displayboard.get_height() * SCALE_FACTOR)))
@@ -283,9 +281,12 @@ while True:
     draw_tiling_background(background)
     sprites.draw(screen)
     draw_tiling_background(shop_background, screen_proportion_numerator * WIDTH // screen_proportion_denominator, 0, WIDTH, HEIGHT)
-    display_display_board()
+
     progress = (gem_time_passed / spawn_time) % 1  # Calculate the progress value
     draw_progress_bar(progress_bar, 0, 0, progress)  # Draw the progress bar
+
+    # Display DisplayBoard with money
+    display_display_board()
 
     # Draw and update shop buttons
     for button in shop_buttons:
