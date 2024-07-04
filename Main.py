@@ -34,7 +34,7 @@ time_passed = 0
 
 # Setup display and font
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-font = pygame.font.SysFont('Arial', 24)
+font = pygame.font.Font('Bitfantasy.ttf', 24)
 fps_clock = pygame.time.Clock()
 
 # Load resources
