@@ -257,13 +257,13 @@ while True:
 
     # Render everything
     draw_tiling_background(background)
+    sprites.draw(screen)
     draw_tiling_background(shop_background, screen_proportion_numerator * WIDTH // screen_proportion_denominator, 0, WIDTH, HEIGHT)
 
     progress = (gem_time_passed / spawn_time) % 1  # Calculate the progress value
     draw_progress_bar(progress_bar, 0, 0, progress)  # Draw the progress bar
     #print(1 + ((gem_time_passed / spawn_time) - gems_spawned))
 
-    sprites.draw(screen)
     text_surface = font.render(f'Money: ${money}', True, (0, 0, 0))
     screen.blit(text_surface, (10, 10))
 
