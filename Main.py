@@ -145,17 +145,17 @@ class Gem(pygame.sprite.Sprite):
     """
     def __init__(self, value, x_pos, y_pos):
         super().__init__()
+        global time_passed
         self.value = value
         self.original_image = shift_hue("Gem.png", value * 10)
         self.original_image = pygame.transform.scale(self.original_image, (int(self.original_image.get_width() * SCALE_FACTOR), int(self.original_image.get_height() * SCALE_FACTOR)))
         self.image = self.original_image
         self.rect = self.image.get_rect(center=(x_pos, y_pos))
-        self.ticks = 0
         self.angle = 0
+        self.angle_modifier = random.randrange(-100, 100)
 
     def update(self):
-        self.ticks += 1
-        self.angle = math.sin(self.ticks / time_passed * 2) * 10
+        self.angle = math.sin(time_passed / 350) * 10
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
 
