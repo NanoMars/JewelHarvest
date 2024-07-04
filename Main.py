@@ -176,25 +176,22 @@ def increase_value_multiplier():
     global value_multiplier
     value_multiplier += 1
 
-def increase_value_multiplier():
-    """
-    Action to increase the value multiplier.
-    """
-    global value_multiplier
-    value_multiplier += 1
-
 def spawn_extra_gems():
     """
     Action to spawn extra gems.
     """
-    global spawn_time, gem_time_passed, gems_spawned, gem_time_passed_adjustment
+    global spawn_time, gem_time_passed, gems_spawned, gem_time_passed_adjustment, ticks
     # Calculate the current progress ratio
-    #current_progress_ratio = gem_time_passed / spawn_time if spawn_time else 0
-    #gems_spawned = int(gem_time_passed / ((4 * spawn_time) / 5)) + 1
-    # Adjust spawn_time
+    current_progress_ratio = gem_time_passed / spawn_time if spawn_time else 0
+    
+    # Calculate the new spawn time
     spawn_time = (spawn_time * 4) / 5
-    gem_time_passed_adjustment = (5/4) * (ticks + gem_time_passed_adjustment) - ticks
+    
+    # Adjust gem_time_passed_adjustment using the formula
+    gem_time_passed_adjustment = (5 / 4) * (ticks + gem_time_passed_adjustment) - ticks
+    
     # Recalculate gems_spawned based on new spawn_time
+    gems_spawned = int(gem_time_passed / spawn_time) + 1
     
 
 def draw_tiling_background(background, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
