@@ -23,12 +23,13 @@ button_spacing_y = 10  # Adjusted for better spacing
 
 # Game variables
 ticks = 0
-time_passed = 0
+gem_time_passed = 0
 money = 0
 value_multiplier = 1
 gems_spawned = 0
 spawn_time = 5
 screen_proportion_numerator, screen_proportion_denominator = 14, 19
+gem_time_passed_adjustment = 0
 
 # Setup display and font
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -178,13 +179,15 @@ def spawn_extra_gems():
     """
     Action to spawn extra gems.
     """
-    global spawn_time, time_passed, gems_spawned
+    global spawn_time, gem_time_passed, gems_spawned, gem_time_passed_adjustment
     # Calculate the current progress ratio
-    current_progress_ratio = time_passed / spawn_time if spawn_time else 0
+    #current_progress_ratio = gem_time_passed / spawn_time if spawn_time else 0
+    #gems_spawned = int(gem_time_passed / ((4 * spawn_time) / 5)) + 1
     # Adjust spawn_time
     spawn_time = (spawn_time * 4) / 5
+    gem_time_passed_adjustment = (5/4) * (ticks + gem_time_passed_adjustment) - ticks
     # Recalculate gems_spawned based on new spawn_time
-    gems_spawned = int(time_passed / spawn_time)
+    
 
 def draw_tiling_background(background, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
     """
@@ -239,17 +242,18 @@ while True:
     # Update game state
     sprites.update()
     ticks += 1
-    time_passed = ticks / FPS
-    if time_passed / spawn_time > gems_spawned:
-        spawn_gem(random.randrange(1, 15))
+    gem_time_passed = (ticks + gem_time_passed_adjustment) / FPS
+    if gem_time_passed / spawn_time > gems_spawned:
+        spawn_gem(random.randrange(10000, 10001))
         gems_spawned += 1
 
     # Render everything
     draw_tiling_background(background)
     draw_tiling_background(shop_background, screen_proportion_numerator * WIDTH // screen_proportion_denominator, 0, WIDTH, HEIGHT)
 
-    progress = (time_passed / spawn_time) % 1  # Calculate the progress value
+    progress = (gem_time_passed / spawn_time) % 1  # Calculate the progress value
     draw_progress_bar(progress_bar, 0, 0, progress)  # Draw the progress bar
+    print(1 + ((gem_time_passed / spawn_time) - gems_spawned))
 
     sprites.draw(screen)
     text_surface = font.render(f'Money: ${money}', True, (0, 0, 0))
