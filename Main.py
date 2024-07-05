@@ -226,7 +226,7 @@ def draw_progress_bar(bar_image, x, y, progress):
 
 # Create shop buttons
 button1 = ShopButton(button_start_x, button_start_y, signboard, increase_value_multiplier, 10, 'Increase Multiplier')
-button2 = ShopButton(button_start_x, button_start_y + button1.image.get_height() + button_spacing_y, signboard, spawn_extra_gems, 20, 'Spawn Extra Gems')
+button2 = ShopButton(button_start_x, button_start_y + button1.image.get_height() + button_spacing_y, signboard, spawn_extra_gems, 30, 'Spawn Extra Gems')
 shop_buttons = [button1, button2]
 # Constants for DisplayBoard
 
@@ -274,7 +274,7 @@ while True:
     ticks += 1
     gem_time_passed = (time_passed + gem_time_passed_adjustment) / 1000
     if gem_time_passed / spawn_time > gems_spawned:
-        spawn_gem(random.randrange(10000, 10001))
+        spawn_gem(random.randrange(1, 3))
         gems_spawned += 1
 
     # Render everything
