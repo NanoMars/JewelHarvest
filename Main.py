@@ -25,7 +25,7 @@ button_spacing_y = 10  # Adjusted for better spacing
 # Game variables
 ticks = 0
 gem_time_passed = 0
-money = 30
+money = 1000
 value_multiplier = 1
 gems_spawned = 0
 spawn_time = 5
@@ -308,7 +308,7 @@ while True:
     #print(gems_on_screen)
     while gem_time_passed / spawn_time > gems_spawned and max_gems > gems_on_screen:
         if reset_thing:
-            gems_spawned = int(gem_time_passed / spawn_time) + 1
+            gems_spawned = int(gem_time_passed / spawn_time)
             reset_thing = False
         spawn_gem(random.randrange(1, 3))
         
