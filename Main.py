@@ -34,6 +34,7 @@ time_passed = 0
 reset_thing = False
 max_gems = 10
 gems_on_screen = 0
+gems_were_on_screen = 0
 
 # Setup display and font
 pygame.display.set_caption(f'Jewelharvest')
@@ -67,7 +68,7 @@ def save_game(filename='savefile.pkl'):
         print("Game saved!")
 
 def load_game(filename='savefile.pkl'):
-    global ticks, gem_time_passed, money, value_multiplier, gems_spawned, spawn_time, time_passed, reset_thing, max_gems, gems_on_screen
+    global ticks, gem_time_passed, money, value_multiplier, gems_spawned, spawn_time, time_passed, reset_thing, max_gems, gems_were_on_screen
     try:
         with open(filename, 'rb') as f:
             game_state = pickle.load(f)
@@ -75,7 +76,7 @@ def load_game(filename='savefile.pkl'):
             value_multiplier = game_state['value_multiplier']
             spawn_time = game_state['spawn_time']
             max_gems = game_state['max_gems']
-            gems_on_screen = game_state['gems_on_screen']
+            gems_were_on_screen = game_state['gems_on_screen']
             for btn, state in zip(shop_buttons, game_state['shop_buttons']):
                 btn.owned, btn.cost = state
             print("Game loaded!")
@@ -271,9 +272,7 @@ def display_display_board():
 
 #loading game before other stuff
 load_game()
-for i in range(1, gems_on_screen):
-    spawn_gem(random.randrange(1, 3))
-    gems_spawned = 0
+gems_spawned -= gems_were_on_screen - 1
 
 
 
