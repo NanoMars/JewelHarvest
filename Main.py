@@ -179,10 +179,11 @@ def render_text_wrapped(text, font, color, max_width):
     return text_surface
 
 def spawn_gem(value):
-    global gems_on_screen
+    global gems_on_screen, gems_spawned
     gem = Gem(value * value_multiplier, random.randrange(0, int(screen_proportion_numerator * WIDTH / screen_proportion_denominator)), random.randrange(0, HEIGHT))
     sprites.add(gem)
     gems_on_screen += 1
+    gems_spawned += 1
 
 def increase_value_multiplier():
     global value_multiplier
@@ -249,22 +250,26 @@ while True:
     sprites.update()
     ticks += 1
     
-    
+    #print(gem_time_passed)
+    #print((gem_time_passed / spawn_time) - gems_spawned)
+    #print(gems_on_screen)
     while gem_time_passed / spawn_time > gems_spawned and max_gems > gems_on_screen:
         if reset_thing:
             gems_spawned = int(gem_time_passed / spawn_time) + 1
             reset_thing = False
         spawn_gem(random.randrange(1, 10000))
         
-    if max_gems >= gems_on_screen:
-      gem_time_passed = (time_passed + gem_time_passed_adjustment) / 1000
-      progress = (gem_time_passed / spawn_time) % 1
-      draw_progress_bar(progress_bar, 0, 0, progress)
+    
 
     draw_tiling_background(background)
     sprites.draw(screen)
     draw_tiling_background(shop_background, screen_proportion_numerator * WIDTH // screen_proportion_denominator, 0, WIDTH, HEIGHT)
-
+    if max_gems > gems_on_screen:
+      gem_time_passed += fps_clock.get_time() / 1000
+      print(fps_clock.tick())
+      progress = (gem_time_passed / spawn_time) % 1
+      draw_progress_bar(progress_bar, 0, 0, progress)
+      
     display_display_board()
 
     for button in shop_buttons:
