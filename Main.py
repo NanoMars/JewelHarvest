@@ -35,7 +35,7 @@ reset_thing = False
 
 # Setup display and font
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-font = pygame.font.Font('Bitfantasy.ttf', 24)
+font = pygame.font.Font('Bitfantasy.ttf', 34)  # Increased font size
 fps_clock = pygame.time.Clock()
 
 # Load resources
@@ -49,16 +49,6 @@ displayboard = pygame.image.load('DisplayBoard.png').convert_alpha()
 sprites = pygame.sprite.Group()
 
 def shift_hue(img_path, degree_shift):
-    """
-    Shift the hue of an image.
-
-    Args:
-    img_path (str): Path to the image file.
-    degree_shift (float): Amount to shift the hue.
-
-    Returns:
-    pygame.Surface: The modified image as a Pygame surface.
-    """
     img = Image.open(img_path).convert('RGBA')
     ld = img.load()
     width, height = img.size
@@ -76,16 +66,7 @@ def shift_hue(img_path, degree_shift):
     byte_io.seek(0)
     return pygame.image.load(byte_io)
 
-import pygame
-import math
-
-import pygame
-import math
-
 class ShopButton:
-    """
-    A class representing a shop button in the game.
-    """
     def __init__(self, x, y, image, action, cost, description):
         self.image = pygame.transform.scale(image, (int(image.get_width() * SCALE_FACTOR), int(image.get_height() * SCALE_FACTOR)))
         self.original_image = self.image.copy()
@@ -101,6 +82,11 @@ class ShopButton:
         self.angle = 0
         self.animation_time = 6000  # in milliseconds
         self.direction = 1
+        self.text_surface = None
+        self.update_text_surface()
+
+    def update_text_surface(self):
+        self.text_surface = render_text_wrapped(f'{self.owned} {self.description} - ${self.cost}', font, (0, 0, 0), self.rect.width)
 
     def draw(self):
         global time_passed
@@ -110,26 +96,32 @@ class ShopButton:
         self.handle_click(time_passed)
 
     def display_info(self):
-        text_surface = font.render(f'{self.owned} {self.description} - ${self.cost}', True, (0, 0, 0))
-        rotated_text = pygame.transform.rotate(text_surface, self.angle)
-        text_rect = rotated_text.get_rect(center=self.rect.center)
-        screen.blit(rotated_text, text_rect.topleft)
+      # Rotate the text surface
+      rotated_text = pygame.transform.rotate(self.text_surface, self.angle)
+      
+      # Calculate the center position of the text surface relative to the button
+      text_rect = rotated_text.get_rect()
+      text_rect.center = self.rect.center
+      
+      # Blit the rotated text surface at the calculated position
+      screen.blit(rotated_text, text_rect.topleft)
 
     def handle_click(self, time_passed):
-        global money  # Declare global variable at the beginning
-        if self.rect.collidepoint(pygame.mouse.get_pos()):
-            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
-                self.rotating = True
-                self.last_click_time = time_passed  # Reset last click time when clicked
-                self.clicked = True
-                self.direction = self.direction * -1
-                if money >= self.cost:
-                    self.action()  # Call the unique action
-                    money -= self.cost
-                    self.owned += 1
-                    self.cost = self.base_cost * (self.owned + 1)  # Increase cost based on the number owned
-            elif pygame.mouse.get_pressed()[0] == 0:
-                self.clicked = False
+      global money
+      if self.rect.collidepoint(pygame.mouse.get_pos()):
+          if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
+              self.rotating = True
+              self.last_click_time = time_passed  # Reset last click time when clicked
+              self.clicked = True
+              self.direction = self.direction * -1
+              if money >= self.cost:
+                  self.action()  # Call the unique action
+                  money -= self.cost
+                  self.owned += 1
+                  self.cost = self.base_cost * (self.owned + 1)  # Increase cost based on the number owned
+                  self.update_text_surface()  # Update the text surface
+          elif pygame.mouse.get_pressed()[0] == 0:
+              self.clicked = False
 
     def update_rotation(self, time_passed):
         if time_passed - self.last_click_time >= self.animation_time:
@@ -142,9 +134,6 @@ class ShopButton:
         self.rect = self.image.get_rect(center=self.rect.center)
 
 class Gem(pygame.sprite.Sprite):
-    """
-    A class to represent a gem with physics and effects.
-    """
     def __init__(self, value, x_pos, y_pos):
         super().__init__()
         global time_passed
@@ -161,51 +150,42 @@ class Gem(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
 
-def spawn_gem(value):
-    """
-    Function to spawn a new gem on the screen.
+def render_text_wrapped(text, font, color, max_width):
+    buffer = 45
+    adjusted_max_width = max_width - 2 * buffer  # Adjust the max width to include the buffer
+    words = text.split()
+    lines = []
+    while words:
+        line = ''
+        while words and font.size(line + words[0])[0] <= adjusted_max_width:
+            line += (words.pop(0) + ' ')
+        lines.append(line)
+    line_surfaces = [font.render(line.strip(), True, color) for line in lines]
+    text_height = sum(line.get_height() for line in line_surfaces)
+    text_surface = pygame.Surface((max_width, text_height), pygame.SRCALPHA)
+    y = 0
+    for line_surface in line_surfaces:
+        x = (max_width - line_surface.get_width()) // 2
+        text_surface.blit(line_surface, (x, y))
+        y += line_surface.get_height()
+    return text_surface
 
-    Args:
-    value (int): The value of the gem.
-    """
+def spawn_gem(value):
     gem = Gem(value * value_multiplier, random.randrange(0, int(screen_proportion_numerator * WIDTH / screen_proportion_denominator)), random.randrange(0, HEIGHT))
     sprites.add(gem)
 
 def increase_value_multiplier():
-    """
-    Action to increase the value multiplier.
-    """
     global value_multiplier
     value_multiplier += 1
 
 def spawn_extra_gems():
-    """
-    Action to spawn extra gems.
-    """
-    
     global spawn_time, gem_time_passed, gems_spawned, gem_time_passed_adjustment, ticks, reset_thing
     reset_thing = True
-    # Calculate the current progress ratio
     current_progress_ratio = gem_time_passed / spawn_time if spawn_time else 0
-    # Calculate the new spawn time
     spawn_time = (spawn_time * 4) / 5
-    # Adjust gem_time_passed_adjustment using the formula
-    print((gem_time_passed / spawn_time) - gems_spawned)
     gem_time_passed_adjustment = (5 / 4) * (ticks + gem_time_passed_adjustment) - ticks
-    # Recalculate gems_spawned based on new spawn_time
-    #gems_spawned = int(gem_time_passed / spawn_time)
-    #print((gem_time_passed / spawn_time) - gems_spawned)
-    
-    
 
 def draw_tiling_background(background, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
-    """
-    Draw a tiling background on the screen within the given coordinates.
-
-    Args:
-    background (pygame.Surface): The background image to tile.
-    x1, y1, x2, y2 (int): Coordinates to define the area to fill with the background.
-    """
     background = pygame.transform.scale(background, (int(background.get_width() * SCALE_FACTOR), int(background.get_height() * SCALE_FACTOR)))
     bg_width, bg_height = background.get_size()
     for x in range(x1, x2, bg_width):
@@ -213,47 +193,29 @@ def draw_tiling_background(background, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
             screen.blit(background, (x, y))
 
 def draw_progress_bar(bar_image, x, y, progress):
-    """
-    Draw a progress bar that is gradually revealed from left to right.
-
-    Args:
-    bar_image (pygame.Surface): The progress bar image.
-    x, y (int): The starting coordinates of the progress bar.
-    progress (float): The progress value (0 to 1).
-    """
     bar_image = pygame.transform.scale(bar_image, (int(bar_image.get_width() * SCALE_FACTOR), int(bar_image.get_height() * SCALE_FACTOR)))
     bar_width = bar_image.get_width()
     max_reveal_width = int((screen_proportion_numerator / screen_proportion_denominator) * WIDTH)
     reveal_width = int(max_reveal_width * progress)
     screen.blit(bar_image, (x + reveal_width - bar_width, y), (0, 0, bar_width, bar_image.get_height()))
 
-# Create shop buttons
 button1 = ShopButton(button_start_x, button_start_y, signboard, increase_value_multiplier, 10, 'Increase Multiplier')
 button2 = ShopButton(button_start_x, button_start_y + button1.image.get_height() + button_spacing_y, signboard, spawn_extra_gems, 30, 'Spawn Extra Gems')
 shop_buttons = [button1, button2]
-# Constants for DisplayBoard
-
 
 def display_display_board():
-    """
-    Display the DisplayBoard at the calculated position and render the current money on it.
-    """
     display_board_width = displayboard.get_width() * SCALE_FACTOR
     display_board_height = displayboard.get_height() * SCALE_FACTOR
-
     x = button_start_x - display_board_width
-    y = 10  # 10 pixels from the top
+    y = 10
 
-    # Draw the DisplayBoard
     display_board_image = pygame.transform.scale(displayboard, (int(displayboard.get_width() * SCALE_FACTOR), int(displayboard.get_height() * SCALE_FACTOR)))
     screen.blit(display_board_image, (x, y))
-
-    # Display the money on the DisplayBoard
-    money_text = font.render(f'{money}$', True, (0, 0, 0))
+    money_text = render_text_wrapped(f'{money}$', font, (0, 0, 0), display_board_width)
     money_text_rect = money_text.get_rect(center=(x + display_board_image.get_width() / 2, y + display_board_image.get_height() / 2))
     screen.blit(money_text, money_text_rect.topleft)
 
-# Game loop
+# Main game loop
 while True:
     fps_clock.tick(FPS)
     if pygame.time.get_ticks() != 0:
@@ -270,31 +232,27 @@ while True:
                     if gem.rect.collidepoint(mouse_x, mouse_y):
                         money += gem.value
                         sprites.remove(gem)
-                        break  # Exit the loop after finding the clicked gem
+                        break
 
-    # Update game state
     sprites.update()
     ticks += 1
     gem_time_passed = (time_passed + gem_time_passed_adjustment) / 1000
     while gem_time_passed / spawn_time > gems_spawned:
-      if reset_thing:
-        gems_spawned = int(gem_time_passed / spawn_time)
-        reset_thing = False
-      spawn_gem(random.randrange(1, 10000))
-      gems_spawned += 1
+        if reset_thing:
+            gems_spawned = int(gem_time_passed / spawn_time)
+            reset_thing = False
+        spawn_gem(random.randrange(1, 10000))
+        gems_spawned += 1
 
-    # Render everything
     draw_tiling_background(background)
     sprites.draw(screen)
     draw_tiling_background(shop_background, screen_proportion_numerator * WIDTH // screen_proportion_denominator, 0, WIDTH, HEIGHT)
 
-    progress = (gem_time_passed / spawn_time) % 1  # Calculate the progress value
-    draw_progress_bar(progress_bar, 0, 0, progress)  # Draw the progress bar
+    progress = (gem_time_passed / spawn_time) % 1
+    draw_progress_bar(progress_bar, 0, 0, progress)
 
-    # Display DisplayBoard with money
     display_display_board()
 
-    # Draw and update shop buttons
     for button in shop_buttons:
         button.draw()
 
