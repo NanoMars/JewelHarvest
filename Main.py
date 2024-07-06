@@ -31,6 +31,7 @@ spawn_time = 5
 screen_proportion_numerator, screen_proportion_denominator = 14, 19
 gem_time_passed_adjustment = 0
 time_passed = 0
+reset_thing = False
 
 # Setup display and font
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -181,18 +182,20 @@ def spawn_extra_gems():
     """
     Action to spawn extra gems.
     """
-    global spawn_time, gem_time_passed, gems_spawned, gem_time_passed_adjustment, ticks
+    
+    global spawn_time, gem_time_passed, gems_spawned, gem_time_passed_adjustment, ticks, reset_thing
+    reset_thing = True
     # Calculate the current progress ratio
     current_progress_ratio = gem_time_passed / spawn_time if spawn_time else 0
-    
     # Calculate the new spawn time
     spawn_time = (spawn_time * 4) / 5
-    
     # Adjust gem_time_passed_adjustment using the formula
+    print((gem_time_passed / spawn_time) - gems_spawned)
     gem_time_passed_adjustment = (5 / 4) * (ticks + gem_time_passed_adjustment) - ticks
-    
     # Recalculate gems_spawned based on new spawn_time
-    gems_spawned = int(gem_time_passed / spawn_time) + 1
+    #gems_spawned = int(gem_time_passed / spawn_time)
+    #print((gem_time_passed / spawn_time) - gems_spawned)
+    
     
 
 def draw_tiling_background(background, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
@@ -273,9 +276,12 @@ while True:
     sprites.update()
     ticks += 1
     gem_time_passed = (time_passed + gem_time_passed_adjustment) / 1000
-    if gem_time_passed / spawn_time > gems_spawned:
-        spawn_gem(random.randrange(1, 3))
-        gems_spawned += 1
+    while gem_time_passed / spawn_time > gems_spawned:
+      if reset_thing:
+        gems_spawned = int(gem_time_passed / spawn_time)
+        reset_thing = False
+      spawn_gem(random.randrange(1, 10000))
+      gems_spawned += 1
 
     # Render everything
     draw_tiling_background(background)
