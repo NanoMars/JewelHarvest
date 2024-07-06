@@ -184,7 +184,7 @@ class Gem(pygame.sprite.Sprite):
         super().__init__()
         global time_passed
         self.value = value
-        self.original_image = shift_hue("Gem.png", value * 10)
+        self.original_image = shift_hue("Assets/Textures/Gem.png", value * 10)
         self.original_image = pygame.transform.scale(self.original_image, (int(self.original_image.get_width() * SCALE_FACTOR), int(self.original_image.get_height() * SCALE_FACTOR)))
         self.image = self.original_image
         self.rect = self.image.get_rect(center=(x_pos, y_pos))
