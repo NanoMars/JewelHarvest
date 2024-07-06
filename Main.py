@@ -25,7 +25,7 @@ button_spacing_y = 10  # Adjusted for better spacing
 # Game variables
 ticks = 0
 gem_time_passed = 0
-money = 10000000
+money = 30
 value_multiplier = 1
 gems_spawned = 0
 spawn_time = 5
@@ -79,7 +79,9 @@ def load_game(filename='savefile.pkl'):
             gems_were_on_screen = game_state['gems_on_screen']
             for btn, state in zip(shop_buttons, game_state['shop_buttons']):
                 btn.owned, btn.cost = state
+                btn.update_text_surface()
             print("Game loaded!")
+            
     except FileNotFoundError:
         print("No saved game found.")
         
