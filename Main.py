@@ -195,6 +195,10 @@ def spawn_extra_gems():
     current_progress_ratio = gem_time_passed / spawn_time if spawn_time else 0
     spawn_time = (spawn_time * 4) / 5
     gem_time_passed_adjustment = (5 / 4) * (ticks + gem_time_passed_adjustment) - ticks
+    
+def increase_max_gems():
+    global max_gems
+    max_gems = max_gems * 1.25
 
 def draw_tiling_background(background, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
     background = pygame.transform.scale(background, (int(background.get_width() * SCALE_FACTOR), int(background.get_height() * SCALE_FACTOR)))
@@ -211,8 +215,10 @@ def draw_progress_bar(bar_image, x, y, progress):
     screen.blit(bar_image, (x + reveal_width - bar_width, y), (0, 0, bar_width, bar_image.get_height()))
 
 button1 = ShopButton(button_start_x, button_start_y, signboard, increase_value_multiplier, 10, 'Increase Multiplier')
-button2 = ShopButton(button_start_x, button_start_y + button1.image.get_height() + button_spacing_y, signboard, spawn_extra_gems, 30, 'Spawn Accelerator')
-shop_buttons = [button1, button2]
+button2 = ShopButton(button_start_x, button_start_y + button1.rect.height + button_spacing_y, signboard, spawn_extra_gems, 30, 'Spawn Accelerator')
+button3 = ShopButton(button_start_x, button2.rect.y + button2.rect.height + button_spacing_y, signboard, increase_max_gems, 100, 'Increase Max Gems')
+
+shop_buttons = [button1, button2, button3]
 
 
 def display_display_board():
