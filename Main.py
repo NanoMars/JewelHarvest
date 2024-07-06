@@ -24,7 +24,7 @@ button_spacing_y = 10  # Adjusted for better spacing
 # Game variables
 ticks = 0
 gem_time_passed = 0
-money = 0
+money = 10000000
 value_multiplier = 1
 gems_spawned = 0
 spawn_time = 5
@@ -117,7 +117,7 @@ class ShopButton:
                     self.action()  # Call the unique action
                     money -= self.cost
                     self.owned += 1
-                    self.cost = self.base_cost * (self.owned + 1)  # Increase cost based on the number owned
+                    self.cost = int(self.base_cost * (1.5 ** self.owned))  # Exponential cost increase
                     self.update_text_surface()  # Update the text surface
             elif pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
@@ -183,14 +183,15 @@ def render_text_wrapped(text, font, color, max_width):
 
 def spawn_gem(value):
     global gems_on_screen, gems_spawned
-    gem = Gem(value * value_multiplier, random.randrange(0, int(screen_proportion_numerator * WIDTH / screen_proportion_denominator)), random.randrange(0, HEIGHT))
+    gem = Gem(int(value * value_multiplier), random.randrange(0, int(screen_proportion_numerator * WIDTH / screen_proportion_denominator)), random.randrange(0, HEIGHT))
     sprites.add(gem)
     gems_on_screen += 1
     gems_spawned += 1
 
 def increase_value_multiplier():
     global value_multiplier
-    value_multiplier += 1
+    value_multiplier = (value_multiplier + 1) + (0.01 * value_multiplier)
+    print(value_multiplier)
 
 def spawn_extra_gems():
     global spawn_time, gem_time_passed, gems_spawned, gem_time_passed_adjustment, ticks, reset_thing
@@ -276,7 +277,6 @@ while True:
     draw_tiling_background(shop_background, screen_proportion_numerator * WIDTH // screen_proportion_denominator, 0, WIDTH, HEIGHT)
     if max_gems > gems_on_screen:
       gem_time_passed += fps_clock.get_time() / 1000
-      print(fps_clock.tick())
       progress = (gem_time_passed / spawn_time) % 1
       draw_progress_bar(progress_bar, 0, 0, progress)
       
