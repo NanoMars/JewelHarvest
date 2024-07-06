@@ -3,7 +3,7 @@
 
 A simple clicker game made for [Hack Club Arcade](https://hackclub.com/arcade) in a couple days.
 
-![Game Demo](https://i.imgur.com/2aOVi8r.gif)
+![Game Demo](blob:https://giphy.com/037232bd-6905-4fb7-979f-863966ed4af5)
 
 ## Attributions
 
