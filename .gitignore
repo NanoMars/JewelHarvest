@@ -1,2 +1,2 @@
 # Ignore game save files
-.pkl
+*.pkl
