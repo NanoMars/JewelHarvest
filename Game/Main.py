@@ -1,4 +1,5 @@
 import sys
+import os
 import random
 import math
 import io
@@ -7,6 +8,9 @@ from PIL import Image
 import colorsys
 import pygame
 from pygame.locals import *
+
+# Set the working directory to the script's location
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 # Initialize Pygame and its components
 pygame.init()
@@ -37,19 +41,20 @@ gems_on_screen = 0
 gems_were_on_screen = 0
 
 # Setup display and font
-pygame.display.set_caption(f'Jewelharvest')
-game_icon = pygame.image.load('icon.png')
+pygame.display.set_caption('Jewelharvest')
+game_icon = pygame.image.load('Assets/Other/icon.png')
 pygame.display.set_icon(game_icon)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-font = pygame.font.Font('Bitfantasy.ttf', 34)  # Increased font size
+font = pygame.font.Font('Assets/Other/Bitfantasy.ttf', 34)  # Increased font size
 fps_clock = pygame.time.Clock()
 
 # Load resources
-background = pygame.image.load('Rock.png').convert()
-shop_background = pygame.image.load('shopBackground.png').convert()
-signboard = pygame.image.load('SignBoard.png').convert_alpha()
-progress_bar = pygame.image.load('Bar.png').convert_alpha()
-displayboard = pygame.image.load('DisplayBoard.png').convert_alpha()
+background = pygame.image.load('Assets/Textures/Rock.png').convert()
+shop_background = pygame.image.load('Assets/Textures/shopBackground.png').convert()
+signboard = pygame.image.load('Assets/Textures/SignBoard.png').convert_alpha()
+progress_bar = pygame.image.load('Assets/Textures/Bar.png').convert_alpha()
+displayboard = pygame.image.load('Assets/Textures/DisplayBoard.png').convert_alpha()
+
 
 # Sprite groups
 sprites = pygame.sprite.Group()
@@ -67,7 +72,7 @@ def save_game(filename='savefile.pkl'):
             pickle.dump(game_state, f)
         print("Game saved!")
 
-def load_game(filename='savefile.pkl'):
+def load_game(filename='Saves/savefile.pkl'):
     global ticks, gem_time_passed, money, value_multiplier, gems_spawned, spawn_time, time_passed, reset_thing, max_gems, gems_were_on_screen
     try:
         with open(filename, 'rb') as f:
