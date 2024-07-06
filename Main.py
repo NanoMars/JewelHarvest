@@ -2,6 +2,7 @@ import sys
 import random
 import math
 import io
+import pickle
 from PIL import Image
 import colorsys
 import pygame
@@ -29,7 +30,6 @@ value_multiplier = 1
 gems_spawned = 0
 spawn_time = 5
 screen_proportion_numerator, screen_proportion_denominator = 14, 19
-gem_time_passed_adjustment = 0
 time_passed = 0
 reset_thing = False
 max_gems = 10
@@ -52,6 +52,37 @@ displayboard = pygame.image.load('DisplayBoard.png').convert_alpha()
 
 # Sprite groups
 sprites = pygame.sprite.Group()
+
+def save_game(filename='savefile.pkl'):
+        game_state = {
+            'money': money,
+            'value_multiplier': value_multiplier,
+            'spawn_time': spawn_time,
+            'max_gems': max_gems,
+            'gems_on_screen': gems_on_screen,
+            'shop_buttons': [(btn.owned, btn.cost) for btn in shop_buttons]
+        }
+        with open(filename, 'wb') as f:
+            pickle.dump(game_state, f)
+        print("Game saved!")
+
+def load_game(filename='savefile.pkl'):
+    global ticks, gem_time_passed, money, value_multiplier, gems_spawned, spawn_time, time_passed, reset_thing, max_gems, gems_on_screen
+    try:
+        with open(filename, 'rb') as f:
+            game_state = pickle.load(f)
+            money = game_state['money']
+            value_multiplier = game_state['value_multiplier']
+            spawn_time = game_state['spawn_time']
+            max_gems = game_state['max_gems']
+            gems_on_screen = game_state['gems_on_screen']
+            for btn, state in zip(shop_buttons, game_state['shop_buttons']):
+                btn.owned, btn.cost = state
+            print("Game loaded!")
+    except FileNotFoundError:
+        print("No saved game found.")
+        
+        
 
 def shift_hue(img_path, degree_shift):
     img = Image.open(img_path).convert('RGBA')
@@ -119,9 +150,10 @@ class ShopButton:
                     self.owned += 1
                     self.cost = int(self.base_cost * (1.5 ** self.owned))  # Exponential cost increase
                     self.update_text_surface()  # Update the text surface
+                    save_game()
             elif pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
-
+        
     def draw(self):
         global time_passed
         self.update_rotation(time_passed)
@@ -194,11 +226,10 @@ def increase_value_multiplier():
     print(value_multiplier)
 
 def spawn_extra_gems():
-    global spawn_time, gem_time_passed, gems_spawned, gem_time_passed_adjustment, ticks, reset_thing
+    global spawn_time, gem_time_passed, gems_spawned, ticks, reset_thing
     reset_thing = True
     current_progress_ratio = gem_time_passed / spawn_time if spawn_time else 0
     spawn_time = (spawn_time * 4) / 5
-    gem_time_passed_adjustment = (5 / 4) * (ticks + gem_time_passed_adjustment) - ticks
     
 def increase_max_gems():
     global max_gems
@@ -237,6 +268,15 @@ def display_display_board():
     money_text_rect = money_text.get_rect(center=(x + display_board_image.get_width() / 2, y + display_board_image.get_height() / 2))
     screen.blit(money_text, money_text_rect.topleft)
 
+
+#loading game before other stuff
+load_game()
+for i in range(1, gems_on_screen):
+    spawn_gem(random.randrange(1, 3))
+    gems_spawned = 0
+
+
+
 # Main game loop
 while True:
     pygame.display.set_caption(f'Jewelharvest - ${money}')
@@ -246,6 +286,7 @@ while True:
 
     for event in pygame.event.get():
         if event.type == QUIT:
+            save_game()
             pygame.quit()
             sys.exit()
         elif event.type == MOUSEBUTTONDOWN:
