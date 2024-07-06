@@ -36,6 +36,9 @@ max_gems = 10
 gems_on_screen = 0
 
 # Setup display and font
+pygame.display.set_caption(f'Jewelharvest')
+game_icon = pygame.image.load('icon.png')
+pygame.display.set_icon(game_icon)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 font = pygame.font.Font('Bitfantasy.ttf', 34)  # Increased font size
 fps_clock = pygame.time.Clock()
@@ -235,6 +238,7 @@ def display_display_board():
 
 # Main game loop
 while True:
+    pygame.display.set_caption(f'Jewelharvest - ${money}')
     fps_clock.tick(FPS)
     if pygame.time.get_ticks() != 0:
         time_passed = pygame.time.get_ticks()
