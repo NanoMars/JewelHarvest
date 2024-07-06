@@ -32,6 +32,8 @@ screen_proportion_numerator, screen_proportion_denominator = 14, 19
 gem_time_passed_adjustment = 0
 time_passed = 0
 reset_thing = False
+max_gems = 10
+gems_on_screen = 0
 
 # Setup display and font
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -86,7 +88,36 @@ class ShopButton:
         self.update_text_surface()
 
     def update_text_surface(self):
-        self.text_surface = render_text_wrapped(f'{self.owned} {self.description} - ${self.cost}', font, (0, 0, 0), self.rect.width)
+        # Include the special character for wrapping in the description text
+        self.text_surface = render_text_wrapped(f'{self.owned} {self.description} \n ${self.cost}', font, (0, 0, 0), self.rect.width)
+
+    def display_info(self):
+        # Rotate the text surface
+        rotated_text = pygame.transform.rotate(self.text_surface, self.angle)
+        
+        # Calculate the center position of the text surface relative to the button
+        text_rect = rotated_text.get_rect()
+        text_rect.center = self.rect.center
+        
+        # Blit the rotated text surface at the calculated position
+        screen.blit(rotated_text, text_rect.topleft)
+
+    def handle_click(self, time_passed):
+        global money
+        if self.rect.collidepoint(pygame.mouse.get_pos()):
+            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
+                self.rotating = True
+                self.last_click_time = time_passed  # Reset last click time when clicked
+                self.clicked = True
+                self.direction = self.direction * -1
+                if money >= self.cost:
+                    self.action()  # Call the unique action
+                    money -= self.cost
+                    self.owned += 1
+                    self.cost = self.base_cost * (self.owned + 1)  # Increase cost based on the number owned
+                    self.update_text_surface()  # Update the text surface
+            elif pygame.mouse.get_pressed()[0] == 0:
+                self.clicked = False
 
     def draw(self):
         global time_passed
@@ -94,34 +125,6 @@ class ShopButton:
         screen.blit(self.image, self.rect.topleft)
         self.display_info()
         self.handle_click(time_passed)
-
-    def display_info(self):
-      # Rotate the text surface
-      rotated_text = pygame.transform.rotate(self.text_surface, self.angle)
-      
-      # Calculate the center position of the text surface relative to the button
-      text_rect = rotated_text.get_rect()
-      text_rect.center = self.rect.center
-      
-      # Blit the rotated text surface at the calculated position
-      screen.blit(rotated_text, text_rect.topleft)
-
-    def handle_click(self, time_passed):
-      global money
-      if self.rect.collidepoint(pygame.mouse.get_pos()):
-          if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
-              self.rotating = True
-              self.last_click_time = time_passed  # Reset last click time when clicked
-              self.clicked = True
-              self.direction = self.direction * -1
-              if money >= self.cost:
-                  self.action()  # Call the unique action
-                  money -= self.cost
-                  self.owned += 1
-                  self.cost = self.base_cost * (self.owned + 1)  # Increase cost based on the number owned
-                  self.update_text_surface()  # Update the text surface
-          elif pygame.mouse.get_pressed()[0] == 0:
-              self.clicked = False
 
     def update_rotation(self, time_passed):
         if time_passed - self.last_click_time >= self.animation_time:
@@ -153,14 +156,19 @@ class Gem(pygame.sprite.Sprite):
 def render_text_wrapped(text, font, color, max_width):
     buffer = 45
     adjusted_max_width = max_width - 2 * buffer  # Adjust the max width to include the buffer
-    words = text.split()
     lines = []
-    while words:
-        line = ''
-        while words and font.size(line + words[0])[0] <= adjusted_max_width:
-            line += (words.pop(0) + ' ')
-        lines.append(line)
-    line_surfaces = [font.render(line.strip(), True, color) for line in lines]
+    
+    # Split the text into segments based on the newline character
+    segments = text.split('\n')
+    for segment in segments:
+        words = segment.split()
+        while words:
+            line = ''
+            while words and font.size(line + words[0])[0] <= adjusted_max_width:
+                line += (words.pop(0) + ' ')
+            lines.append(line.strip())
+
+    line_surfaces = [font.render(line, True, color) for line in lines]
     text_height = sum(line.get_height() for line in line_surfaces)
     text_surface = pygame.Surface((max_width, text_height), pygame.SRCALPHA)
     y = 0
@@ -171,8 +179,10 @@ def render_text_wrapped(text, font, color, max_width):
     return text_surface
 
 def spawn_gem(value):
+    global gems_on_screen
     gem = Gem(value * value_multiplier, random.randrange(0, int(screen_proportion_numerator * WIDTH / screen_proportion_denominator)), random.randrange(0, HEIGHT))
     sprites.add(gem)
+    gems_on_screen += 1
 
 def increase_value_multiplier():
     global value_multiplier
@@ -200,8 +210,9 @@ def draw_progress_bar(bar_image, x, y, progress):
     screen.blit(bar_image, (x + reveal_width - bar_width, y), (0, 0, bar_width, bar_image.get_height()))
 
 button1 = ShopButton(button_start_x, button_start_y, signboard, increase_value_multiplier, 10, 'Increase Multiplier')
-button2 = ShopButton(button_start_x, button_start_y + button1.image.get_height() + button_spacing_y, signboard, spawn_extra_gems, 30, 'Spawn Extra Gems')
+button2 = ShopButton(button_start_x, button_start_y + button1.image.get_height() + button_spacing_y, signboard, spawn_extra_gems, 30, 'Spawn Accelerator')
 shop_buttons = [button1, button2]
+
 
 def display_display_board():
     display_board_width = displayboard.get_width() * SCALE_FACTOR
@@ -232,24 +243,27 @@ while True:
                     if gem.rect.collidepoint(mouse_x, mouse_y):
                         money += gem.value
                         sprites.remove(gem)
+                        gems_on_screen -= 1
                         break
 
     sprites.update()
     ticks += 1
-    gem_time_passed = (time_passed + gem_time_passed_adjustment) / 1000
-    while gem_time_passed / spawn_time > gems_spawned:
+    
+    
+    while gem_time_passed / spawn_time > gems_spawned and max_gems > gems_on_screen:
         if reset_thing:
-            gems_spawned = int(gem_time_passed / spawn_time)
+            gems_spawned = int(gem_time_passed / spawn_time) + 1
             reset_thing = False
         spawn_gem(random.randrange(1, 10000))
-        gems_spawned += 1
+        
+    if max_gems >= gems_on_screen:
+      gem_time_passed = (time_passed + gem_time_passed_adjustment) / 1000
+      progress = (gem_time_passed / spawn_time) % 1
+      draw_progress_bar(progress_bar, 0, 0, progress)
 
     draw_tiling_background(background)
     sprites.draw(screen)
     draw_tiling_background(shop_background, screen_proportion_numerator * WIDTH // screen_proportion_denominator, 0, WIDTH, HEIGHT)
-
-    progress = (gem_time_passed / spawn_time) % 1
-    draw_progress_bar(progress_bar, 0, 0, progress)
 
     display_display_board()
 
