@@ -263,7 +263,7 @@ while True:
         if reset_thing:
             gems_spawned = int(gem_time_passed / spawn_time) + 1
             reset_thing = False
-        spawn_gem(random.randrange(1, 10000))
+        spawn_gem(random.randrange(1, 3))
         
     
 
