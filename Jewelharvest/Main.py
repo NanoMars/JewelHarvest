@@ -50,9 +50,6 @@ font = pygame.font.Font('Assets/Other/Bitfantasy.ttf', 34)  # Increased font siz
 fps_clock = pygame.time.Clock()
 
 # Load resources
-gem_1 = pygame.mixer.Sound('Assets/Sounds/Gem1.wav')
-gem_2 = pygame.mixer.Sound('Assets/Sounds/Gem2.wav')
-gem_3 = pygame.mixer.Sound('Assets/Sounds/Gem3.wav')
 background = pygame.image.load('Assets/Textures/Rock.png').convert()
 shop_background = pygame.image.load('Assets/Textures/shopBackground.png').convert()
 signboard = pygame.image.load('Assets/Textures/SignBoard.png').convert_alpha()
@@ -72,13 +69,9 @@ gem_2_sound = pygame.mixer.Sound('Assets/Sounds/Gem2.wav')
 def play_gem_2():
     gem_2_sound.play()
 
-gem_3_sound = pygame.mixer.Sound('Assets/Sounds/Gem3.wav')
-def play_gem_3():
-    gem_3_sound.play()
 gem_sounds = [
     play_gem_1, 
-    play_gem_2,
-    play_gem_3
+    play_gem_2
 ]
 
 # Sprite groups
@@ -333,6 +326,7 @@ while True:
                         money += gem.value
                         sprites.remove(gem)
                         gems_on_screen -= 1
+                        random.choice(gem_sounds)()
                         break
 
     sprites.update()
