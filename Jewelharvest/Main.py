@@ -50,13 +50,36 @@ font = pygame.font.Font('Assets/Other/Bitfantasy.ttf', 34)  # Increased font siz
 fps_clock = pygame.time.Clock()
 
 # Load resources
-purchase_1 = pygame.mixer.Sound('Assets/Sounds/Purchase1.wav')
+gem_1 = pygame.mixer.Sound('Assets/Sounds/Gem1.wav')
+gem_2 = pygame.mixer.Sound('Assets/Sounds/Gem2.wav')
+gem_3 = pygame.mixer.Sound('Assets/Sounds/Gem3.wav')
 background = pygame.image.load('Assets/Textures/Rock.png').convert()
 shop_background = pygame.image.load('Assets/Textures/shopBackground.png').convert()
 signboard = pygame.image.load('Assets/Textures/SignBoard.png').convert_alpha()
 progress_bar = pygame.image.load('Assets/Textures/Bar.png').convert_alpha()
 displayboard = pygame.image.load('Assets/Textures/DisplayBoard.png').convert_alpha()
 
+
+#sfx
+
+purchase_sound = pygame.mixer.Sound('Assets/Sounds/Purchase.wav')
+
+gem_1_sound = pygame.mixer.Sound('Assets/Sounds/Gem1.wav')
+def play_gem_1():
+    gem_1_sound.play()
+
+gem_2_sound = pygame.mixer.Sound('Assets/Sounds/Gem2.wav')
+def play_gem_2():
+    gem_2_sound.play()
+
+gem_3_sound = pygame.mixer.Sound('Assets/Sounds/Gem3.wav')
+def play_gem_3():
+    gem_3_sound.play()
+gem_sounds = [
+    play_gem_1, 
+    play_gem_2,
+    play_gem_3
+]
 
 # Sprite groups
 sprites = pygame.sprite.Group()
@@ -164,7 +187,7 @@ class ShopButton:
                     self.owned += 1
                     self.cost = int(self.base_cost * (1.5 ** self.owned))  # Exponential cost increase
                     self.update_text_surface()  # Update the text surface
-                    purchase_1.play()
+                    purchase_sound.play()
                     save_game()
             elif pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
