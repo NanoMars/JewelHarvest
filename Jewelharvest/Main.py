@@ -242,6 +242,7 @@ class Bomb(pygame.sprite.Sprite):
         global money
         for gem in sprites:
             if isinstance(gem, Gem) and self.rect.centerx - self.radius <= gem.rect.centerx <= self.rect.centerx + self.radius and self.rect.centery - self.radius <= gem.rect.centery <= self.rect.centery + self.radius:
+                global gems_on_screen
                 money += gem.value
                 sprites.remove(gem)
                 gems_on_screen -= 1
@@ -312,11 +313,14 @@ def draw_tiling_background(background, x1=0, y1=0, x2=WIDTH, y2=HEIGHT):
             screen.blit(background, (x, y))
 
 def draw_progress_bar(bar_image, x, y, progress):
+    print(f"Drawing progress bar with progress: {progress}")  # Debugging print
     bar_image = pygame.transform.scale(bar_image, (int(bar_image.get_width() * SCALE_FACTOR), int(bar_image.get_height() * SCALE_FACTOR)))
     bar_width = bar_image.get_width()
     max_reveal_width = int((screen_proportion_numerator / screen_proportion_denominator) * WIDTH)
     reveal_width = int(max_reveal_width * progress)
+    print(f"Bar width: {bar_width}, Max reveal width: {max_reveal_width}, Reveal width: {reveal_width}")  # Debugging print
     screen.blit(bar_image, (x + reveal_width - bar_width, y), (0, 0, bar_width, bar_image.get_height()))
+    print("Progress bar drawn")  # Debugging print
 
 button1 = ShopButton(button_start_x, button_start_y, signboard, increase_value_multiplier, 10, 'Increase Multiplier')
 button2 = ShopButton(button_start_x, button_start_y + button1.rect.height + button_spacing_y, signboard, spawn_extra_gems, 30, 'Spawn Accelerator')
@@ -409,6 +413,9 @@ while True:
             print("Spawning gem")  # Debugging print
             spawn_gem(random.randrange(1, 3))
 
+        progress = (gem_time_passed / spawn_time) % 1
+        draw_progress_bar(progress_bar, 0, 0, progress)
+      
     print("Displaying display board")  # Debugging print
     display_display_board()
 
