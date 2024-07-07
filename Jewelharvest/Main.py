@@ -15,6 +15,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 # Initialize Pygame and its components
 pygame.init()
 pygame.font.init()
+pygame.mixer.init()
 
 # Constants for the game
 WIDTH, HEIGHT = 1280, 720
@@ -29,7 +30,7 @@ button_spacing_y = 10  # Adjusted for better spacing
 # Game variables
 ticks = 0
 gem_time_passed = 0
-money = 1000
+money = 9999999999
 value_multiplier = 1
 gems_spawned = 0
 spawn_time = 5
@@ -49,6 +50,7 @@ font = pygame.font.Font('Assets/Other/Bitfantasy.ttf', 34)  # Increased font siz
 fps_clock = pygame.time.Clock()
 
 # Load resources
+soft_cash = pygame.mixer.Sound('Assets/Sounds/Purchase.wav')
 background = pygame.image.load('Assets/Textures/Rock.png').convert()
 shop_background = pygame.image.load('Assets/Textures/shopBackground.png').convert()
 signboard = pygame.image.load('Assets/Textures/SignBoard.png').convert_alpha()
@@ -109,6 +111,10 @@ def shift_hue(img_path, degree_shift):
     img.save(byte_io, format='PNG')
     byte_io.seek(0)
     return pygame.image.load(byte_io)
+    sound_array = sound_array.astype(np.float32)
+    indices = np.round(np.arange(0, len(sound_array), pitch_factor))
+    indices = indices[indices < len(sound_array)].astype(int)
+    return pygame.sndarray.make_sound(sound_array[indices].astype(np.int16))
 
 class ShopButton:
     def __init__(self, x, y, image, action, cost, description):
@@ -158,6 +164,7 @@ class ShopButton:
                     self.owned += 1
                     self.cost = int(self.base_cost * (1.5 ** self.owned))  # Exponential cost increase
                     self.update_text_surface()  # Update the text surface
+                    soft_cash.play()
                     save_game()
             elif pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
