@@ -50,7 +50,7 @@ font = pygame.font.Font('Assets/Other/Bitfantasy.ttf', 34)  # Increased font siz
 fps_clock = pygame.time.Clock()
 
 # Load resources
-soft_cash = pygame.mixer.Sound('Assets/Sounds/Purchase.wav')
+purchase_1 = pygame.mixer.Sound('Assets/Sounds/Purchase1.wav')
 background = pygame.image.load('Assets/Textures/Rock.png').convert()
 shop_background = pygame.image.load('Assets/Textures/shopBackground.png').convert()
 signboard = pygame.image.load('Assets/Textures/SignBoard.png').convert_alpha()
@@ -164,7 +164,7 @@ class ShopButton:
                     self.owned += 1
                     self.cost = int(self.base_cost * (1.5 ** self.owned))  # Exponential cost increase
                     self.update_text_surface()  # Update the text surface
-                    soft_cash.play()
+                    purchase_1.play()
                     save_game()
             elif pygame.mouse.get_pressed()[0] == 0:
                 self.clicked = False
