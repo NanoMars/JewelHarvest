@@ -30,7 +30,7 @@ button_spacing_y = 10  # Adjusted for better spacing
 # Game variables
 ticks = 0
 gem_time_passed = 0
-money = 9999999999
+money = 0
 value_multiplier = 1
 gems_spawned = 0
 spawn_time = 5
@@ -55,6 +55,8 @@ shop_background = pygame.image.load('Assets/Textures/shopBackground.png').conver
 signboard = pygame.image.load('Assets/Textures/SignBoard.png').convert_alpha()
 progress_bar = pygame.image.load('Assets/Textures/Bar.png').convert_alpha()
 displayboard = pygame.image.load('Assets/Textures/DisplayBoard.png').convert_alpha()
+dynamite = pygame.image.load('Assets/Textures/Dynamite.png').convert_alpha()
+
 
 
 #sfx
@@ -218,12 +220,42 @@ class Gem(pygame.sprite.Sprite):
         self.angle = math.sin(time_passed / 350) * 10
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
+        
+class Bomb(pygame.sprite.Sprite):
+    def __init__(self, x_pos, y_pos, timer, radius):
+        super().__init__()
+        self.original_image = dynamite
+        self.original_image = pygame.transform.scale(self.original_image, (int(self.original_image.get_width() * SCALE_FACTOR), int(self.original_image.get_height() * SCALE_FACTOR)))
+        self.image = self.original_image
+        self.rect = self.image.get_rect(center=(x_pos, y_pos))
+        self.timer = timer
+        self.radius = radius
+        self.spawn_time = pygame.time.get_ticks()
+
+    def update(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.spawn_time >= self.timer * 1000:
+            self.collect_gems()
+            self.kill()
+
+    def collect_gems(self):
+        global money
+        for gem in sprites:
+            if isinstance(gem, Gem) and self.rect.centerx - self.radius <= gem.rect.centerx <= self.rect.centerx + self.radius and self.rect.centery - self.radius <= gem.rect.centery <= self.rect.centery + self.radius:
+                money += gem.value
+                sprites.remove(gem)
+                gems_on_screen -= 1
+                gem_sounds[random.randint(0, 1)]()
+                
+def spawn_bomb(timer, radius):
+    bomb = Bomb(random.randrange(0, WIDTH), random.randrange(0, HEIGHT), timer, radius)
+    sprites.add(bomb)
 
 def render_text_wrapped(text, font, color, max_width):
     buffer = 45
     adjusted_max_width = max_width - 2 * buffer  # Adjust the max width to include the buffer
     lines = []
-    
+
     # Split the text into segments based on the newline character
     segments = text.split('\n')
     for segment in segments:
@@ -232,7 +264,11 @@ def render_text_wrapped(text, font, color, max_width):
             line = ''
             while words and font.size(line + words[0])[0] <= adjusted_max_width:
                 line += (words.pop(0) + ' ')
+
             lines.append(line.strip())
+
+            if not line.strip():  # Break if line is empty to avoid infinite loop
+                break
 
     line_surfaces = [font.render(line, True, color) for line in lines]
     text_height = sum(line.get_height() for line in line_surfaces)
@@ -246,10 +282,12 @@ def render_text_wrapped(text, font, color, max_width):
 
 def spawn_gem(value):
     global gems_on_screen, gems_spawned
+    print(f"Spawning gem with value: {value}")  # Debugging print
     gem = Gem(int(value * value_multiplier), random.randrange(0, int(screen_proportion_numerator * WIDTH / screen_proportion_denominator)), random.randrange(0, HEIGHT))
     sprites.add(gem)
     gems_on_screen += 1
     gems_spawned += 1
+    print(f"Gems on screen: {gems_on_screen}, Gems spawned: {gems_spawned}")  # Debugging print
 
 def increase_value_multiplier():
     global value_multiplier
@@ -288,16 +326,28 @@ shop_buttons = [button1, button2, button3]
 
 
 def display_display_board():
-    display_board_width = displayboard.get_width() * SCALE_FACTOR
-    display_board_height = displayboard.get_height() * SCALE_FACTOR
-    x = button_start_x - display_board_width
-    y = 10
+    print("Entering display_display_board")  # Debugging print
+    try:
+        display_board_width = displayboard.get_width() * SCALE_FACTOR
+        display_board_height = displayboard.get_height() * SCALE_FACTOR
+        print(f"Display board size: {display_board_width}x{display_board_height}")  # Debugging print
 
-    display_board_image = pygame.transform.scale(displayboard, (int(displayboard.get_width() * SCALE_FACTOR), int(displayboard.get_height() * SCALE_FACTOR)))
-    screen.blit(display_board_image, (x, y))
-    money_text = render_text_wrapped(f'{money}$', font, (0, 0, 0), display_board_width)
-    money_text_rect = money_text.get_rect(center=(x + display_board_image.get_width() / 2, y + display_board_image.get_height() / 2))
-    screen.blit(money_text, money_text_rect.topleft)
+        x = button_start_x - display_board_width
+        y = 10
+
+        display_board_image = pygame.transform.scale(displayboard, (int(displayboard.get_width() * SCALE_FACTOR), int(displayboard.get_height() * SCALE_FACTOR)))
+        screen.blit(display_board_image, (x, y))
+        print("Blitted display board image")  # Debugging print
+
+        money_text = render_text_wrapped(f'{money}$', font, (0, 0, 0), display_board_width)
+        money_text_rect = money_text.get_rect(center=(x + display_board_image.get_width() / 2, y + display_board_image.get_height() / 2))
+        print(f"Money text rect: {money_text_rect}")  # Debugging print
+
+        screen.blit(money_text, money_text_rect.topleft)
+        print("Blitted money text")  # Debugging print
+    except Exception as e:
+        print(f"Error in display_display_board: {e}")  # Debugging print
+    print("Exiting display_display_board")  # Debugging print
 
 
 #loading game before other stuff
@@ -306,8 +356,8 @@ gems_spawned -= gems_were_on_screen - 1
 
 
 
-# Main game loop
 while True:
+    print("Entering main loop")  # Debugging print
     pygame.display.set_caption(f'Jewelharvest - ${money}')
     fps_clock.tick(FPS)
     if pygame.time.get_ticks() != 0:
@@ -315,10 +365,12 @@ while True:
 
     for event in pygame.event.get():
         if event.type == QUIT:
+            print("Exiting game")  # Debugging print
             save_game()
             pygame.quit()
             sys.exit()
         elif event.type == MOUSEBUTTONDOWN:
+            print("Mouse button down")  # Debugging print
             if event.button == 1:
                 mouse_x, mouse_y = event.pos
                 for gem in sprites:
@@ -328,32 +380,41 @@ while True:
                         gems_on_screen -= 1
                         random.choice(gem_sounds)()
                         break
+        elif event.type == KEYDOWN:
+            if event.key == pygame.K_b:  # Debug key for spawning a bomb
+                print("B key pressed - Spawning bomb")  # Debugging print
+                spawn_bomb(5, 100)  # Spawns a bomb with a 5-second timer and 100-pixel radius
 
+    print("Updating sprites")  # Debugging print
     sprites.update()
     ticks += 1
-    
-    #print(gem_time_passed)
-    #print((gem_time_passed / spawn_time) - gems_spawned)
-    #print(gems_on_screen)
-    while gem_time_passed / spawn_time > gems_spawned and max_gems > gems_on_screen:
-        if reset_thing:
-            gems_spawned = int(gem_time_passed / spawn_time)
-            reset_thing = False
-        spawn_gem(random.randrange(1, 3))
-        
-    
 
+    print("Drawing background")  # Debugging print
     draw_tiling_background(background)
+    
+    print("Drawing sprites")  # Debugging print
     sprites.draw(screen)
+    
+    print("Drawing shop background")  # Debugging print
     draw_tiling_background(shop_background, screen_proportion_numerator * WIDTH // screen_proportion_denominator, 0, WIDTH, HEIGHT)
+
     if max_gems > gems_on_screen:
-      gem_time_passed += fps_clock.get_time() / 1000
-      progress = (gem_time_passed / spawn_time) % 1
-      draw_progress_bar(progress_bar, 0, 0, progress)
-      
+        print("Updating gem time passed")  # Debugging print
+        gem_time_passed += fps_clock.get_time() / 1000
+        print(f"gem_time_passed: {gem_time_passed}, spawn_time: {spawn_time}, gems_spawned: {gems_spawned}, gems_on_screen: {gems_on_screen}, max_gems: {max_gems}")  # Debugging print
+        while gem_time_passed / spawn_time > gems_spawned and max_gems > gems_on_screen:
+            if reset_thing:
+                gems_spawned = int(gem_time_passed / spawn_time)
+                reset_thing = False
+            print("Spawning gem")  # Debugging print
+            spawn_gem(random.randrange(1, 3))
+
+    print("Displaying display board")  # Debugging print
     display_display_board()
 
     for button in shop_buttons:
+        print(f"Drawing button {button.description}")  # Debugging print
         button.draw()
 
     pygame.display.flip()
+    print("End of main loop iteration")  # Debugging print
