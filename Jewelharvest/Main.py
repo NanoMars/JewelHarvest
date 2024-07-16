@@ -30,7 +30,7 @@ button_spacing_y = 10  # Adjusted for better spacing
 # Game variables
 ticks = 0
 gem_time_passed = 0
-money = 0
+money = 99999999999
 value_multiplier = 1
 gems_spawned = 0
 spawn_time = 5
@@ -221,6 +221,39 @@ class Gem(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.original_image, self.angle)
         self.rect = self.image.get_rect(center=self.rect.center)
         
+class Explosion(pygame.sprite.Sprite):
+    def __init__(self, x, y, radius, duration):
+        super().__init__()
+        self.original_radius = radius
+        self.radius = radius
+        self.duration = duration
+        self.spawn_time = pygame.time.get_ticks()
+        self.image = pygame.Surface((2*radius, 2*radius), pygame.SRCALPHA)
+        self.draw_explosion(radius)
+        self.rect = self.image.get_rect(center=(x, y))
+    
+    def draw_explosion(self, radius):
+        self.image.fill((0, 0, 0, 0))  # Clear the surface
+        pygame.draw.circle(self.image, (255, 0, 0), (radius, radius), radius)  # Red circle
+        pygame.draw.circle(self.image, (255, 165, 0), (radius, radius), int((3/4) * radius))  # Orange circle
+        pygame.draw.circle(self.image, (255, 255, 0), (radius, radius), int((2/6) * radius))  # Yellow circle
+
+    def update(self):
+        current_time = pygame.time.get_ticks()
+        elapsed_time = current_time - self.spawn_time
+        if elapsed_time >= self.duration:
+            self.kill()
+        else:
+            # Calculate the new radius based on the elapsed time
+            new_radius = self.original_radius * (1 - elapsed_time / self.duration)
+            self.image = pygame.Surface((2*new_radius, 2*new_radius), pygame.SRCALPHA)
+            self.draw_explosion(new_radius)
+            self.rect = self.image.get_rect(center=self.rect.center)
+
+def spawn_bomb(timer, radius):
+    bomb = Bomb(random.randrange(0, WIDTH), random.randrange(0, HEIGHT), timer, radius)
+    sprites.add(bomb)
+
 class Bomb(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, timer, radius):
         super().__init__()
@@ -236,6 +269,7 @@ class Bomb(pygame.sprite.Sprite):
         current_time = pygame.time.get_ticks()
         if current_time - self.spawn_time >= self.timer * 1000:
             self.collect_gems()
+            self.create_explosion()
             self.kill()
 
     def collect_gems(self):
@@ -247,6 +281,10 @@ class Bomb(pygame.sprite.Sprite):
                 sprites.remove(gem)
                 gems_on_screen -= 1
                 gem_sounds[random.randint(0, 1)]()
+
+    def create_explosion(self):
+        explosion = Explosion(self.rect.centerx, self.rect.centery, self.radius, 500)
+        sprites.add(explosion)
                 
 def spawn_bomb(timer, radius):
     bomb = Bomb(random.randrange(0, WIDTH), random.randrange(0, HEIGHT), timer, radius)
