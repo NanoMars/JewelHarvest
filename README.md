@@ -1,7 +1,7 @@
 # Jewelharvest
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/) [![python](https://img.shields.io/badge/Python-3.1-3776AB.svg?style=flat&logo=python&logoColor=white)](https://www.python.org) [![Pygame Version](https://img.shields.io/badge/Pygame-2.6.0-4caf50.svg)](https://www.pygame.org/news/2024/6/pygame-2-6-0)
 
-A simple clicker game made for [Hack Club Arcade](https://hackclub.com/arcade) in a couple days.
+A simple clicker game made for [Hack Club Arcade](https://hackclub.com/arcade).
 
 ![Game Demo](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXRhM3J6MWM3cTFycnRjZjVhZHRlZjFkNXlpanA3OGxxczV5amZ1diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/vwU9HqRfAHaPhZcCsr/giphy.gif)
 
