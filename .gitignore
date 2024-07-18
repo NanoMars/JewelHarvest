@@ -1,2 +1,3 @@
 # Ignore game save files
 *.pkl
+venv/
