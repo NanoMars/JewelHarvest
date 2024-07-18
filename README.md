@@ -13,7 +13,7 @@ by Mitch, from [Nimble Beast Collective](https://nimblebeastscollective.itch.io/
 ### Background Textures: [Textures](https://piiixl.itch.io/textures)
 by [piiixl](https://piiixl.itch.io/) is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.en)
 
-### Sounds: [Free Natural UI SFX Pack]([https://piiixl.itch.io/textures](https://cicifyre.itch.io/free-natural-sfx-pack))
+### Sounds: [Free Natural UI SFX Pack](https://piiixl.itch.io/textures](https://cicifyre.itch.io/free-natural-sfx-pack))
 by [Cici Fyre]([https://piiixl.itch.io/](https://cicifyre.carrd.co/)) is licensed under [CC0 1.0 UNIVERSAL](https://creativecommons.org/publicdomain/zero/1.0/deed.en)
 
 
