@@ -80,17 +80,19 @@ gem_sounds = [
 sprites = pygame.sprite.Group()
 
 def save_game(filename='Saves/savefile.pkl'):
-        game_state = {
-            'money': money,
-            'value_multiplier': value_multiplier,
-            'spawn_time': spawn_time,
-            'max_gems': max_gems,
-            'gems_on_screen': gems_on_screen,
-            'shop_buttons': [(btn.owned, btn.cost) for btn in shop_buttons]
-        }
-        with open(filename, 'wb') as f:
-            pickle.dump(game_state, f)
-        print("Game saved!")
+    os.makedirs(os.path.dirname(filename), exist_ok=True)  # Ensure the directory exists
+    game_state = {
+        'money': money,
+        'value_multiplier': value_multiplier,
+        'spawn_time': spawn_time,
+        'max_gems': max_gems,
+        'gems_on_screen': gems_on_screen,
+        'shop_buttons': [(btn.owned, btn.cost) for btn in shop_buttons]
+    }
+    with open(filename, 'wb') as f:
+        pickle.dump(game_state, f)
+    print("Game saved!")
+
 
 def load_game(filename='Saves/savefile.pkl'):
     global ticks, gem_time_passed, money, value_multiplier, gems_spawned, spawn_time, time_passed, reset_thing, max_gems, gems_were_on_screen
