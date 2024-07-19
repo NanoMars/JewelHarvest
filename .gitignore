@@ -1,3 +1,5 @@
 # Ignore game save files
 *.pkl
 venv/
+build/
+dist/
