@@ -12,6 +12,7 @@ a = Analysis(
         ('Assets/Other/*', 'Assets/Other'),
         ('Assets/Sounds/*', 'Assets/Sounds'),
         ('Assets/Textures/*', 'Assets/Textures')
+        ('Saves/', 'Saves')
     ],
     hiddenimports=[],
     hookspath=[],
