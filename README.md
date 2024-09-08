@@ -3,7 +3,7 @@
 
 Jewel collector / clicker game for [Hack Club Arcade](https://hackclub.com/arcade). AI was used to aid coding, specifically with bomb, rotation and to aid with structure and commenting.
 
-![Game Demo](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeXRhM3J6MWM3cTFycnRjZjVhZHRlZjFkNXlpanA3OGxxczV5amZ1diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/vwU9HqRfAHaPhZcCsr/giphy.gif)
+![Game Demo](https://cloud-4pg1jarzq-hack-club-bot.vercel.app/0giphy_animation.webp)
 
 ## Attributions
 
